@@ -13,6 +13,9 @@ Zako IssueTracker ♥ for minco
 - `/이슈 추가`: 아무나 가능. Modal창 띄워서 새 이슈를 생성
 
 ![`/이슈 추가`](/img/new.png)
+<br> Modal image<br>
+!['이슈추가모달'](/img/Modal.png)
+
 - `/이슈 삭제`: ~~본인 혹은 관리자가 사용 가능. proposed 또는 rejected인 이슈는 본인이 삭제 가능. approved인 이슈는 본인은 못하고 관리자만 가능. 관리자는 언제나 삭제 가능.~~
 - `/이슈 상태 <상태: proposed, approved, rejected중 택1>`: 관리자만 사용 가능. 이슈 상태를 바꿈.
 
