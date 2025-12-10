@@ -90,6 +90,16 @@ class Program
             {
                 {"ko","이슈 명령어 최상위 식별자(?)"}
             })
+            //get
+            .AddOption(new SlashCommandOptionBuilder()
+                .WithName("get")
+                .WithDescription("Get issue by ID")
+                .AddOption(new SlashCommandOptionBuilder() // get (int issueId)
+                    .WithName("id")
+                    .WithDescription("Issue ID")
+                    .WithRequired(true)
+                    .WithType(ApplicationCommandOptionType.Integer))
+                .WithType(ApplicationCommandOptionType.SubCommand))
             //new
             .AddOption(new SlashCommandOptionBuilder()
                 .WithName("new")
@@ -107,7 +117,6 @@ class Program
                 .AddOption(issueStatusChoies)
                 .WithType(ApplicationCommandOptionType.SubCommand)
             )
-            
             // list
             .AddOption(new SlashCommandOptionBuilder()
                 .WithName("list")
@@ -125,9 +134,8 @@ class Program
                 .AddOption(issueTagChoices)
                 .WithType(ApplicationCommandOptionType.SubCommand))
             .Build();
-        
-        await guild.CreateApplicationCommandAsync(newIssue);
-        //return Task.CompletedTask;
+
+        await _client.CreateGlobalApplicationCommandAsync(newIssue);
     }
     
     private static async Task MessageReceivedAsync(SocketMessage message)
@@ -234,9 +242,7 @@ class Program
                             break;
                         case "status":
                         {
-                            
-                            // TODO : Permission Check Excpetion
-                            if (slashCommand.User.Id != 700624937236561950 || slashCommand.User.Id != 781088270830141441)
+                            if (slashCommand.User.Id != 700624937236561950 && slashCommand.User.Id != 781088270830141441)
                             {
                                 var eb = new EmbedBuilder()
                                     .WithTitle("안돼")
@@ -286,9 +292,11 @@ class Program
                         }
                             break;
                         case "list":
-                            return;
+                            break;
                         case "export":
-                            return;
+                            break;
+                        case "get":
+                            break;
                         default:
                             await slashCommand.RespondAsync("Unknown command");
                             break;

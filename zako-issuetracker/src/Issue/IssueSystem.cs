@@ -34,7 +34,7 @@ public class IssueData
         var con = new SqliteConnection("Data Source=" + DataBaseHelper.dbPath);
         con.Open();
         var cmd = con.CreateCommand();
-        cmd.CommandText = "UPDATE zako SET status = @status WHERE id = @id";
+        cmd.CommandText = "UPDATE zako SET status = @status WHERE ROWID = @id";
         cmd.Parameters.AddWithValue("@status", newStatus.ToString());
         cmd.Parameters.AddWithValue("@id", issueId);
         
