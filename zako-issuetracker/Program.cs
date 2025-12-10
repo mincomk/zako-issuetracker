@@ -1,6 +1,8 @@
-﻿using Discord;
+﻿using System.Drawing;
+using Discord;
 //using Discord.Interactions.Builders;
 using Discord.WebSocket;
+using Color = Discord.Color;
 
 
 namespace zako_issuetracker;
@@ -103,7 +105,9 @@ class Program
                     .WithRequired(true)
                     .WithType(ApplicationCommandOptionType.Integer))
                 .AddOption(issueStatusChoies)
-                .WithType(ApplicationCommandOptionType.SubCommand))
+                .WithType(ApplicationCommandOptionType.SubCommand)
+            )
+            
             // list
             .AddOption(new SlashCommandOptionBuilder()
                 .WithName("list")
@@ -197,8 +201,7 @@ class Program
                     {
                         await modal.RespondAsync(embed: embed, ephemeral: true);
                     }
-
-            }
+                }   
                     break;
                 default:
                     await modal.RespondAsync("undfined command");
@@ -228,12 +231,60 @@ class Program
                                 .AddTextInput("이슈 설명", "issue_detail", placeholder:"이슈 설명을 입력하세요", required:true, style: TextInputStyle.Paragraph);
                                 
                             await slashCommand.RespondWithModalAsync(inModal.Build());
-                            return;
+                            break;
                         case "status":
                         {
                             
+                            // TODO : Permission Check Excpetion
+                            if (slashCommand.User.Id != 700624937236561950 || slashCommand.User.Id != 781088270830141441)
+                            {
+                                var eb = new EmbedBuilder()
+                                    .WithTitle("안돼")
+                                    .WithDescription("넌 안돼.")
+                                    .WithColor(Color.Red)
+                                    .WithCurrentTimestamp();
+                                await slashCommand.RespondAsync(embed: eb.Build(), ephemeral: true);
+                                break;
+                            }
+                            var issueId = (long)slashCommand.Data.Options.First().Options
+                                .First(o => o.Name == "id").Value;
+                            var newStatusStr = (string)slashCommand.Data.Options.First().Options
+                                .First(o => o.Name == "change-to").Value;
+                            var newStatus = Enum.Parse<IssueStatus>(newStatusStr, true);
+                            bool result;
+                            try
+                            {
+                                result = Issue.IssueData.UpdateIssueStatus((int)issueId, newStatus);
+                            }
+                            catch (Exception e)
+                            {
+                                result = false;
+                                Console.WriteLine(e.Message);
+                            }
+
+                            if (!result)
+                            {
+                                var eb = new EmbedBuilder()
+                                    .WithTitle("오류가 발생했습니다")
+                                    .WithDescription("나도 몰라")
+                                    .WithColor(Color.Red)
+                                    .WithCurrentTimestamp();
+                                await slashCommand.RespondAsync(embed: eb.Build(), ephemeral: false);
+                            }
+                            else
+                            {
+                                var eb = new EmbedBuilder()
+                                    .WithTitle("성공했습니다")
+                                    .WithDescription("상태 변경 성공")
+                                    .AddField("Issue ID", issueId.ToString())
+                                    .AddField("New Status", newStatus.ToString())
+                                    .WithColor(Color.Green);
+
+                                await slashCommand.RespondAsync(embed: eb.Build(), ephemeral: false);
+                            }
+                            
                         }
-                            return;
+                            break;
                         case "list":
                             return;
                         case "export":

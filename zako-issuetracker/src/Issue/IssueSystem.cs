@@ -27,7 +27,22 @@ public class IssueData
         return true;
     }
     
-    
+    public static bool UpdateIssueStatus(int? issueId, IssueStatus? newStatus)
+    {
+        if(issueId==null || newStatus==null)
+            return false;
+        var con = new SqliteConnection("Data Source=" + DataBaseHelper.dbPath);
+        con.Open();
+        var cmd = con.CreateCommand();
+        cmd.CommandText = "UPDATE zako SET status = @status WHERE id = @id";
+        cmd.Parameters.AddWithValue("@status", newStatus.ToString());
+        cmd.Parameters.AddWithValue("@id", issueId);
+        
+        var rowsAffected = cmd.ExecuteNonQuery();
+        con.Close();
+
+        return true;
+    }
 }
 
 internal class DataBaseHelper
