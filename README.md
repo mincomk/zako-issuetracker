@@ -32,4 +32,7 @@ Zako IssueTracker ♥ for minco
 
 ## 구현
 최대한 간단하게, PostgresSQL이나 Mongo 쓰면 좋을듯?
-언어는 뭐 파이썬을 쓰던 go를쓰던 TS하던 알아서 끌리는거
+언어는 뭐 파이썬을 쓰던 go를쓰던 TS하던 알아서 끌리는거<br><br>
+귀찮은 부분이라 SQLite 쓰기로 결정
+<br> SQLite 만세 ㅌㅌ
+![SQLite](https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FbdKwrt%2Fbtr0qYWMFi1%2FAAAAAAAAAAAAAAAAAAAAAE2y4AQDhL4Vfn9ZGBV9iCzC6NndkWRFn_ZvujRNQDhw%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1767193199%26allow_ip%3D%26allow_referer%3D%26signature%3DHqIKe%252FRZHBZouLYGEf2jRJAVaLA%253D)
