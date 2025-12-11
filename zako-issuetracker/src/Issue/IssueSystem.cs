@@ -55,7 +55,12 @@ public class IssueData
 
     public static Dictionary<string, IssueContent> ListOfIssue(IssueTag? tag)
     {
-
+        string cTag = tag?.ToString() ?? "%";
+        
+        var con = new SqliteConnection("Data Source=" + DataBaseHelper.dbPath);
+        con.Open();
+        var cmd = con.CreateCommand();
+        
         return _dict;
 
     }
