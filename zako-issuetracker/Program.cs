@@ -67,7 +67,7 @@ class Program
             issueTagChoices.AddChoice(tag, tag.ToLowerInvariant());
         }
 
-        var issueStatusChoies = new SlashCommandOptionBuilder()
+        var issueStatusChoices = new SlashCommandOptionBuilder()
             .WithName("change-to")
             .WithDescription("Change issue status to")
             .WithRequired(true)
@@ -75,7 +75,7 @@ class Program
 
         foreach (var status in Enum.GetNames(typeof(IssueStatus)))
         {
-            issueStatusChoies.AddChoice(status, status.ToLowerInvariant());
+            issueStatusChoices.AddChoice(status, status.ToLowerInvariant());
         }
         
         var newIssue = new SlashCommandBuilder()
@@ -114,19 +114,14 @@ class Program
                     .WithDescription("Issue ID")
                     .WithRequired(true)
                     .WithType(ApplicationCommandOptionType.Integer))
-                .AddOption(issueStatusChoies)
+                .AddOption(issueStatusChoices)
                 .WithType(ApplicationCommandOptionType.SubCommand)
             )
             // list
             .AddOption(new SlashCommandOptionBuilder()
                 .WithName("list")
                 .WithDescription("List of \"issues\"")
-                .AddOption(issueTagChoices) // list (<enum> Tag tag)
-                .AddOption(new SlashCommandOptionBuilder() // list (bool opened = true)
-                    .WithName("opened")
-                    .WithDescription("True = show opened issue only, false = show all")
-                    //.WithRequired(true)
-                    .WithType(ApplicationCommandOptionType.Boolean))
+                .AddOption(issueTagChoices) // list (<enum> Tag tag).WithType(ApplicationCommandOptionType.Boolean))
                 .WithType(ApplicationCommandOptionType.SubCommand))
             .AddOption(new SlashCommandOptionBuilder()
                 .WithName("export")

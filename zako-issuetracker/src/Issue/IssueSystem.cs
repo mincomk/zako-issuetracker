@@ -2,10 +2,19 @@
 
 namespace zako_issuetracker.Issue;
 
-
+public struct IssueContent
+{
+    public string Name;
+    public string Detail;
+    public IssueTag Tag;
+    public IssueStatus Status;
+    public string UserId;
+}
 
 public class IssueData
 {
+    static Dictionary<string, IssueContent> _dict = new Dictionary<string, IssueContent>();
+    
     public static bool StoreIssue(string? name, string? detail, IssueTag? tag, string userId)
     {
         if (name == null || detail == null || tag == null)
@@ -43,20 +52,18 @@ public class IssueData
 
         return true;
     }
+
+    public static Dictionary<string, IssueContent> ListOfIssue(IssueTag? tag)
+    {
+
+        return _dict;
+
+    }
 }
 
 internal class DataBaseHelper
 {
     public const string dbPath = "db.sqlite";
     
-    static int IssueCount()
-    {
-        var con = new SqliteConnection("Data Source=" + dbPath);
-        con.Open();
-        var cmd = con.CreateCommand();
-        cmd.CommandText = "SELECT COUNT(*) FROM zako";
-        var count = Convert.ToInt32(cmd.ExecuteScalar());
-        con.Close();
-        return count;
-    }
+    
 }
