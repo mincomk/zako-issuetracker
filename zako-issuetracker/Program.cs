@@ -53,8 +53,6 @@ class Program
     {
         Console.WriteLine($"{_client.CurrentUser} is connected!");
 
-        var guild = _client.GetGuild(1429043368876314696);
-
         _client.SetActivityAsync(new Game("Gathering Issues..."));
 
         var issueTagChoices = new SlashCommandOptionBuilder()
@@ -137,7 +135,6 @@ class Program
         // The bot should never respond to itself.
         if (message.Author.Id == _client.CurrentUser.Id)
             return;
-        
     }
     private static async Task InteractionCreatedAsync(SocketInteraction interaction)
     {
@@ -287,7 +284,12 @@ class Program
                             break;
                         case "list":
                         {
-                            IssueTag? tag = Enum.Parse<IssueTag>(slashCommand.Data.Options.First().Options.First().Value.ToString() ?? null, true);
+                            string? tagStr = slashCommand.Data.Options.First().Options.FirstOrDefault()?.Value?.ToString();
+                            IssueTag? tag = null;
+                            if (!string.IsNullOrEmpty(tagStr))
+                                tag = Enum.Parse<IssueTag>(tagStr, true);
+                            
+                            Dictionary<int, Issue.IssueContent> dict = Issue.IssueData.ListOfIssue(tag);
                             
                             Dictionary<int, Issue.IssueContent> _dict
                                 = Issue.IssueData.ListOfIssue(tag);
@@ -312,6 +314,37 @@ class Program
                         case "export":
                             break;
                         case "get":
+                        {
+                            var issueId = (long)slashCommand.Data.Options.First().Options
+                                .First(o => o.Name == "id").Value;
+                            
+                            var ctx = Issue.IssueData.GetIssueById((int)issueId);
+                            if (ctx == null)
+                            {
+                                var eb = new EmbedBuilder()
+                                    .WithTitle("오류가 발생했습니다")
+                                    .WithDescription("나도 몰라")
+                                    .WithColor(Color.Red)
+                                    .WithCurrentTimestamp();
+                                await slashCommand.RespondAsync(embed: eb.Build(), ephemeral: false);
+                            }
+                            else
+                            {
+                                var eb = new EmbedBuilder()
+                                    .WithTitle("이슈")
+                                    .WithDescription("이슈 정보를 불러왔습니다")
+                                    .AddField("Name", ctx.Value.Name)
+                                    .AddField("Issue ID", issueId.ToString(), true)
+                                    .AddField("Detail", ctx.Value.Detail, true)
+                                    .AddField("Tag", ctx.Value.Tag.ToString(),true)
+                                    .AddField("Status", ctx.Value.Status.ToString(),true)
+                                    .AddField("User", $"<@{ctx.Value.UserId}>", true)
+                                    .WithColor(Color.Blue)
+                                    .WithCurrentTimestamp();
+                                
+                                await slashCommand.RespondAsync(embed: eb.Build(), ephemeral:true);
+                            }
+                        }
                             break;
                         default:
                             await slashCommand.RespondAsync("Unknown command");

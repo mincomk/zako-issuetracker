@@ -47,7 +47,7 @@ public class IssueData
         cmd.Parameters.AddWithValue("@status", newStatus.ToString());
         cmd.Parameters.AddWithValue("@id", issueId);
         
-        var rowsAffected = cmd.ExecuteNonQuery();
+        cmd.ExecuteNonQuery();
         con.Close();
 
         return true;
@@ -57,16 +57,18 @@ public class IssueData
     {
         string cTag = tag?.ToString() ?? "%";
         
+        var dict = new Dictionary<int, IssueContent>(); // Create new dictionary each time
+        
         var con = new SqliteConnection("Data Source=" + DataBaseHelper.dbPath);
         con.Open();
         var cmd = con.CreateCommand();
-        cmd.CommandText = "SELECT ROWID, name, detail, tag, status, discord FROM zako WHERE tag = @tag";
+        cmd.CommandText = "SELECT ROWID, name, detail, tag, status, discord FROM zako WHERE tag LIKE @tag";
         cmd.Parameters.AddWithValue("@tag", cTag);
         
         var reader = cmd.ExecuteReader();
         while (reader.Read())
         {
-            _dict.Add(reader.GetInt32(0), new IssueContent
+            dict.Add(reader.GetInt32(0), new IssueContent
             {
                 Name = reader.GetString(1),
                 Detail =  reader.GetString(2),
@@ -76,6 +78,34 @@ public class IssueData
             });
         }
         return _dict;
+        con.Close();
+        return dict;
+    }
+
+    public static IssueContent? GetIssueById(int? issueId)
+    {
+        if (issueId == null)
+            return null;
+        var con = new SqliteConnection("Data Source=" + DataBaseHelper.dbPath);
+        con.Open();
+        var cmd = con.CreateCommand();
+        cmd.CommandText = "SELECT name, detail, tag, status, discord  FROM zako WHERE ROWID = @id";
+        cmd.Parameters.AddWithValue("@id", issueId);
+        var reader = cmd.ExecuteReader();
+        if (!reader.Read())
+        {
+            con.Close();
+            return null;
+        }
+        IssueContent respond = new IssueContent();
+        respond.Name = reader.GetString(0);
+        respond.Detail = reader.GetString(1);
+        respond.Tag = Enum.Parse<IssueTag>(reader.GetString(2));
+        respond.Status = Enum.Parse<IssueStatus>(reader.GetString(3));
+        respond.UserId = reader.GetString(4);
+        
+        con.Close();
+        return respond;
     }
 }
 
