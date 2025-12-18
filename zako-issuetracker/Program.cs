@@ -5,6 +5,7 @@ using Discord.WebSocket;
 using Color = Discord.Color;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.Data.Sqlite;
 using zako_issuetracker.Issue;
 
 namespace zako_issuetracker;
