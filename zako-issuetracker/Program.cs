@@ -27,6 +27,9 @@ class Program
     public static async Task Main(string[] args)
     {
         string botToken = EnvLoader.GetToken() ?? throw new ArgumentNullException();
+        string[] adminIds = EnvLoader.GetAdminIds();
+        if (adminIds == Array.Empty<string>())
+            throw new ArgumentNullException();
         
         var config = new DiscordSocketConfig
         {
@@ -165,8 +168,6 @@ class Program
                 else
                     tag = null;
                 
-                
-                
                 if (currentPage <= 1)
                 {
                     await component.RespondAsync("This is the first page!", ephemeral: true);
@@ -287,16 +288,21 @@ class Program
                             break;
                         case "status":
                         {
-                            if (slashCommand.User.Id != 700624937236561950)
+                            string[] adminIds = EnvLoader.GetAdminIds();
+                            foreach (var id in adminIds)
                             {
-                                var eb = new EmbedBuilder()
-                                    .WithTitle("안돼")
-                                    .WithDescription("넌 안돼.")
-                                    .WithColor(Color.Red)
-                                    .WithCurrentTimestamp();
-                                await slashCommand.RespondAsync(embed: eb.Build(), ephemeral: true);
-                                break;
+                                if (slashCommand.User.Id.ToString() != id)
+                                {
+                                    var eb = new EmbedBuilder()
+                                        .WithTitle("안돼")
+                                        .WithDescription("넌 안돼.")
+                                        .WithColor(Color.Red)
+                                        .WithCurrentTimestamp();
+                                    await slashCommand.RespondAsync(embed: eb.Build(), ephemeral: true);
+                                    break;
+                                }
                             }
+                            
                             var issueId = (long)slashCommand.Data.Options.First().Options
                                 .First(o => o.Name == "id").Value;
                             var newStatusStr = (string)slashCommand.Data.Options.First().Options

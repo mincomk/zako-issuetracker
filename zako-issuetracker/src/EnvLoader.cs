@@ -22,4 +22,13 @@ public static class EnvLoader
     {
         return GetEnv()["SQLITE_FILE"] ?? null;
     }
+
+    public static string[] GetAdminIds()
+    {
+        string? ids = Environment.GetEnvironmentVariable("ADMIN_IDS");
+        if(ids == null)
+            return Array.Empty<string>();
+        
+        return ids.Split(",");
+    }
 }
