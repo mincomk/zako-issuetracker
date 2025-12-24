@@ -1,0 +1,10 @@
+﻿services:
+  zako-issuetracker:
+    image: zako-issuetracker
+    build:
+      context: .
+      dockerfile: zako-issuetracker/Dockerfile
+    environment:
+      DISCORD_TOKEN: 
+      SQLITE_PATH: 
+      ADMIN_IDS: 
