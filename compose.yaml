@@ -9,4 +9,4 @@
       SQLITE_FILE: /data/zako.sqlite
       ADMIN_IDS: 
     volumes:
-      - ./data:/data
+      - ./data:/data:rw
