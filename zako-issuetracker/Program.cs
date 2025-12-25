@@ -289,18 +289,15 @@ class Program
                         case "status":
                         {
                             string[] adminIds = EnvLoader.GetAdminIds();
-                            foreach (var id in adminIds)
+                            if (AdminTool.IsAdmin(slashCommand.User.Id.ToString()))
                             {
-                                if (slashCommand.User.Id.ToString() != id)
-                                {
-                                    var eb = new EmbedBuilder()
-                                        .WithTitle("안돼")
-                                        .WithDescription("넌 안돼.")
-                                        .WithColor(Color.Red)
-                                        .WithCurrentTimestamp();
-                                    await slashCommand.RespondAsync(embed: eb.Build(), ephemeral: true);
-                                    break;
-                                }
+                                var eb = new EmbedBuilder()
+                                    .WithTitle("안돼")
+                                    .WithDescription("넌 안돼.")
+                                    .WithColor(Color.Red)
+                                    .WithCurrentTimestamp();
+                                await slashCommand.RespondAsync(embed: eb.Build(), ephemeral: true);
+                                break;
                             }
                             
                             var issueId = (long)slashCommand.Data.Options.First().Options

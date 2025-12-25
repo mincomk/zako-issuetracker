@@ -32,3 +32,12 @@ public static class EnvLoader
         return ids.Split(",");
     }
 }
+
+public static class AdminTool
+{
+    public static bool IsAdmin(string userId)
+    {
+        var adminIds = EnvLoader.GetAdminIds();
+        return adminIds.Contains(userId);
+    }
+}
