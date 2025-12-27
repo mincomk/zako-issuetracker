@@ -14,7 +14,7 @@
       {
         devShells.default = pkgs.mkShell {
           buildInputs = with pkgs; [
-            dotnet-sdk_9
+            dotnet-sdk_10
             sqlite
             git
           ];

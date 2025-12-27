@@ -1,6 +1,8 @@
 # Created by https://www.toptal.com/developers/gitignore/api/visualstudio,visualstudiocode,csharp,rider
 # Edit at https://www.toptal.com/developers/gitignore?templates=visualstudio,visualstudiocode,csharp,rider
 
+.direnv
+
 worktrees
 data/zako.sqlite
 
