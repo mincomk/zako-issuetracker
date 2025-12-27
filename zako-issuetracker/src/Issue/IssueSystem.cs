@@ -72,9 +72,10 @@ public class IssueData
         }
     }
 
-    public static async Task<Dictionary<int, IssueContent>> ListOfIssueAsync(IssueTag? tag)
+    public static async Task<Dictionary<int, IssueContent>> ListOfIssueAsync(IssueTag? tag, IssueStatus? status = null)
     {
         string cTag = tag?.ToString() ?? "%";
+        string cStatus = status?.ToString() ?? "%";
         var dict = new Dictionary<int, IssueContent>();
 
         try
@@ -82,8 +83,9 @@ public class IssueData
             await using var con = new SqliteConnection("Data Source=" + DataBaseHelper.dbPath);
             await con.OpenAsync();
             await using var cmd = con.CreateCommand();
-            cmd.CommandText = "SELECT ROWID, name, detail, tag, status, discord FROM zako WHERE tag LIKE @tag";
+            cmd.CommandText = "SELECT ROWID, name, detail, tag, status, discord FROM zako WHERE tag LIKE @tag AND status LIKE @status";
             cmd.Parameters.AddWithValue("@tag", cTag);
+            cmd.Parameters.AddWithValue("@status", cStatus);
 
             await using var reader = await cmd.ExecuteReaderAsync();
             while (await reader.ReadAsync())
@@ -141,6 +143,28 @@ public class IssueData
         }
     }
 
+    public static async Task<bool> DeleteIssueAsync(int? issueId)
+    {
+        if (issueId == null)
+            return false;
+
+        try
+        {
+            await using var con = new SqliteConnection("Data Source=" + DataBaseHelper.dbPath);
+            await con.OpenAsync();
+            await using var cmd = con.CreateCommand();
+            cmd.CommandText = "DELETE FROM zako WHERE ROWID = @id";
+            cmd.Parameters.AddWithValue("@id", issueId);
+            
+            int rowsAffected = await cmd.ExecuteNonQueryAsync();
+            return rowsAffected > 0;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+    }
+
     [Obsolete("Use StoreIssueAsync instead")]
     public static bool StoreIssue(string? name, string? detail, IssueTag? tag, string userId)
         => StoreIssueAsync(name, detail, tag, userId).GetAwaiter().GetResult();
@@ -151,7 +175,7 @@ public class IssueData
     
     [Obsolete("Use ListOfIssueAsync instead")]
     public static Dictionary<int, IssueContent> ListOfIssue(IssueTag? tag)
-        => ListOfIssueAsync(tag).GetAwaiter().GetResult();
+        => ListOfIssueAsync(tag, null).GetAwaiter().GetResult();
     
     [Obsolete("Use GetIssueByIdAsync instead")]
     public static IssueContent? GetIssueById(int? issueId)

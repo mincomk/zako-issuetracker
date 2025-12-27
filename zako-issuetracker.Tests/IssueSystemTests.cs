@@ -23,7 +23,7 @@ public class IssueSystemTests : IDisposable
         using var con = new SqliteConnection($"Data Source={_testDbPath}");
         con.Open();
         var cmd = con.CreateCommand();
-        cmd.CommandText = "CREATE TABLE IF NOT EXISTS zako(tag int, status int, name text, detail text, discord text)";
+        cmd.CommandText = "CREATE TABLE IF NOT EXISTS zako(id INTEGER PRIMARY KEY AUTOINCREMENT, tag INTEGER NOT NULL, status INTEGER NOT NULL, name TEXT NOT NULL, detail text NOT NULL, discord text NOT NULL)";
         cmd.ExecuteNonQuery();
     }
 

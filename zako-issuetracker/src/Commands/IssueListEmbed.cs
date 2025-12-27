@@ -7,13 +7,14 @@ public static class IssueListEmbed
     private const int PageSize = 10;
     
     
-    public static EmbedBuilder BuildIssueListEmbed(Dictionary<int, Issue.IssueContent> dict, int page, IssueTag? tag)
+    public static EmbedBuilder BuildIssueListEmbed(Dictionary<int, Issue.IssueContent> dict, int page, IssueTag? tag, IssueStatus? status = null)
     {
         string sTag = tag?.ToString() ?? "All";
+        string sStatus = status?.ToString() ?? "All";
         
         var eb = new EmbedBuilder();
         eb.WithTitle($"Issue List :: Page {page}");
-        eb.WithDescription($"tag : {sTag}");
+        eb.WithDescription($"tag : {sTag} | status : {sStatus}");
         eb.WithColor(Color.Blue);
         eb.WithFooter($"Page {page} | Total Issues: {dict.Count}");
         eb.WithTimestamp(DateTimeOffset.Now);
