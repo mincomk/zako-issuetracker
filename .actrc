@@ -1,0 +1,9 @@
+# act configuration file
+# Use Ubuntu images that are more compatible with GitHub Actions
+
+-P ubuntu-latest=catthehacker/ubuntu:act-latest
+-P ubuntu-22.04=catthehacker/ubuntu:act-22.04
+-P ubuntu-20.04=catthehacker/ubuntu:act-20.04
+
+# Set reasonable container options
+--container-architecture linux/amd64
