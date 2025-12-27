@@ -5,6 +5,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E1CACDCB-BEDE-4FF3-A39F-D6FC2B740F66}"
 	ProjectSection(SolutionItems) = preProject
 		compose.yaml = compose.yaml
+		TODO.md = TODO.md
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "zako-issuetracker.Tests", "zako-issuetracker.Tests\zako-issuetracker.Tests.csproj", "{D310F27F-0801-4691-98B7-C70F7ABCB3A3}"

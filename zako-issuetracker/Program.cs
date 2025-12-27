@@ -17,8 +17,8 @@ public enum IssueTag
 
 public enum IssueStatus
 {
-    Proposed, Approved, Rejected
-    // 0, 1, 2,
+    Proposed, Approved, Rejected, Deleted
+    // 0, 1, 2, 3
 }
 class Program
 {
@@ -79,9 +79,9 @@ class Program
         }
 
         var issueStatusChoices = new SlashCommandOptionBuilder()
-            .WithName("change-to")
-            .WithDescription("이슈 상태 변경")
-            .WithRequired(true)
+            .WithName("status")
+            .WithDescription("이슈 상태 선택")
+            //.WithRequired(true)
             .WithType(ApplicationCommandOptionType.String);
 
         foreach (var status in Enum.GetNames(typeof(IssueStatus)))
@@ -125,7 +125,7 @@ class Program
                     .WithDescription("이슈 ID")
                     .WithRequired(true)
                     .WithType(ApplicationCommandOptionType.Integer))
-                .AddOption(issueStatusChoices)
+                .AddOption(issueStatusChoices.WithRequired(true))
                 .WithType(ApplicationCommandOptionType.SubCommand)
             )
             // list
@@ -133,12 +133,21 @@ class Program
                 .WithName("list")
                 .WithDescription("이슈 목록")
                 .AddOption(issueTagChoices) // list (<enum> Tag tag).WithType(ApplicationCommandOptionType.Boolean))
+                .AddOption(issueStatusChoices.WithRequired(false))
                 .WithType(ApplicationCommandOptionType.SubCommand))
             .AddOption(new SlashCommandOptionBuilder()
                 .WithName("export")
                 .WithDescription("이슈 내보내기")
-                .AddOption(issueTagChoices)
+                .AddOption(issueTagChoices.WithRequired(false))
                 .WithType(ApplicationCommandOptionType.SubCommand))
+            .AddOption(new SlashCommandOptionBuilder()
+                .WithName("delete")
+                .WithDescription("이슈 삭제")
+                .AddOption(new SlashCommandOptionBuilder()
+                    .WithName("id")
+                    .WithDescription("이슈 ID")
+                    .WithRequired(true)
+                    .WithType(ApplicationCommandOptionType.Integer)))
             .Build();
 
         await _client.CreateGlobalApplicationCommandAsync(newIssue);
@@ -342,6 +351,8 @@ class Program
                             break;
                         case "list":
                         {
+                            
+                            
                             string? tagStr = slashCommand.Data.Options.First().Options.FirstOrDefault()?.Value?.ToString();
                             IssueTag? tag = null;
                             if (!string.IsNullOrEmpty(tagStr))
@@ -418,6 +429,35 @@ class Program
                                     .WithColor(Color.Blue)
                                     .WithCurrentTimestamp();
                                 
+                                await slashCommand.RespondAsync(embed: eb.Build(), ephemeral: false);
+                            }
+                        }
+                            break;
+                        case "delete":
+                        {
+                            int Id = (int)(long)slashCommand.Data.Options.First().Options.First(o => o.Name == "id").Value;
+    
+                            bool result;
+                            try
+                            {
+                                result = await Issue.IssueData.DeleteIssueAsync(Id);
+                            }
+                            catch (Exception e)
+                            {
+                                result = false;
+                            }
+
+                            if (!result)
+                            {
+                                
+                            }
+                            else
+                            {
+                                var eb = new EmbedBuilder()
+                                    .WithTitle("이슈 삭제 성공")
+                                    .WithDescription($"ID {Id} 이슈를 삭제했습니다.")
+                                    .WithColor(Color.Green)
+                                    .WithCurrentTimestamp();
                                 await slashCommand.RespondAsync(embed: eb.Build(), ephemeral: false);
                             }
                         }

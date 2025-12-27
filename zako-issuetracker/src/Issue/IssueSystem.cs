@@ -153,7 +153,7 @@ public class IssueData
             await using var con = new SqliteConnection("Data Source=" + DataBaseHelper.dbPath);
             await con.OpenAsync();
             await using var cmd = con.CreateCommand();
-            cmd.CommandText = "DELETE FROM zako WHERE ROWID = @id";
+            cmd.CommandText = "UPDATE zako SET (status, name, detail) VALUES (3, \"\", \"\") WHERE id = @id";
             cmd.Parameters.AddWithValue("@id", issueId);
             
             int rowsAffected = await cmd.ExecuteNonQueryAsync();
@@ -164,7 +164,6 @@ public class IssueData
             return false;
         }
     }
-
     
     #region ["Obsolete Sync Wrappers"]
     [Obsolete("Use StoreIssueAsync instead")]
