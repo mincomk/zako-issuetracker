@@ -7,21 +7,15 @@ pipeline {
     agent any
 
     stages {
-        stage('Clone Git Repository') {
-            steps {
-                container('node') {
-                    git branch: "main", url: "${GIT_REPO}"
-                }
-            }
-        }
-
         stage('Build Docker Image') {
             steps {
                 container('kaniko') {
+                    git branch: "main", url: "${GIT_REPO}"
+
                     script {
                         sh '''
                             echo "Building Docker image..."
-                            /kaniko/executor --context $(pwd) --dockerfile $(pwd)/Dockerfile --destination registry.walruslab.org/common/${IMAGE_NAME}:latest
+                            /kaniko/executor --context $(pwd) --dockerfile $(pwd)/zako-issuetracker/Dockerfile --destination registry.walruslab.org/common/${IMAGE_NAME}:latest
                         '''
                     }
                 }
