@@ -3,6 +3,11 @@
 
 name: .NET Build and Test
 
+permissions:
+  checks: write
+  pull-requests: write
+  contents: read
+
 on:
   push:
     branches: [ "master", "main" ]
