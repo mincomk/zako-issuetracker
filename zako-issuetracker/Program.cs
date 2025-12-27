@@ -67,11 +67,11 @@ class Program
     {
         Console.WriteLine($"{_client.CurrentUser} is connected!");
 
-        _client.SetActivityAsync(new Game("Gathering Issues..."));
+        _client.SetActivityAsync(new Game("이슈 수집 중..."));
 
         var issueTagChoices = new SlashCommandOptionBuilder()
             .WithName("tags")
-            .WithDescription("Tags of issue")
+            .WithDescription("이슈 태그")
             .WithType(ApplicationCommandOptionType.String);
         foreach (var tag in Enum.GetNames(typeof(IssueTag)))
         {
@@ -80,7 +80,7 @@ class Program
 
         var issueStatusChoices = new SlashCommandOptionBuilder()
             .WithName("change-to")
-            .WithDescription("Change issue status to")
+            .WithDescription("이슈 상태 변경")
             .WithRequired(true)
             .WithType(ApplicationCommandOptionType.String);
 
@@ -104,25 +104,25 @@ class Program
             //get
             .AddOption(new SlashCommandOptionBuilder()
                 .WithName("get")
-                .WithDescription("Get issue by ID")
+                .WithDescription("ID로 이슈 조회")
                 .AddOption(new SlashCommandOptionBuilder() // get (int issueId)
                     .WithName("id")
-                    .WithDescription("Issue ID")
+                    .WithDescription("이슈 ID")
                     .WithRequired(true)
                     .WithType(ApplicationCommandOptionType.Integer))
                 .WithType(ApplicationCommandOptionType.SubCommand))
             //new
             .AddOption(new SlashCommandOptionBuilder()
                 .WithName("new")
-                .WithDescription("Create new issue")
+                .WithDescription("새 이슈 생성")
                 .WithType(ApplicationCommandOptionType.SubCommand))
             // status
             .AddOption(new SlashCommandOptionBuilder()
                 .WithName("status")
-                .WithDescription("set status")
+                .WithDescription("상태 설정")
                 .AddOption(new SlashCommandOptionBuilder() // status(int issueId)
                     .WithName("id")
-                    .WithDescription("Issue ID")
+                    .WithDescription("이슈 ID")
                     .WithRequired(true)
                     .WithType(ApplicationCommandOptionType.Integer))
                 .AddOption(issueStatusChoices)
@@ -131,12 +131,12 @@ class Program
             // list
             .AddOption(new SlashCommandOptionBuilder()
                 .WithName("list")
-                .WithDescription("List of \"issues\"")
+                .WithDescription("이슈 목록")
                 .AddOption(issueTagChoices) // list (<enum> Tag tag).WithType(ApplicationCommandOptionType.Boolean))
                 .WithType(ApplicationCommandOptionType.SubCommand))
             .AddOption(new SlashCommandOptionBuilder()
                 .WithName("export")
-                .WithDescription("Export the issue")
+                .WithDescription("이슈 내보내기")
                 .AddOption(issueTagChoices)
                 .WithType(ApplicationCommandOptionType.SubCommand))
             .Build();
@@ -158,7 +158,7 @@ class Program
         {
             // Check for the ID created in the button mentioned above.
             if (component.Data.CustomId == "unique-id")
-                await interaction.RespondAsync("Thank you for clicking my button!");
+                await interaction.RespondAsync("버튼을 클릭해주셔서 감사합니다!");
             else if (component.Data.CustomId == "issue-previous")
             {
                 int currentPage = int.Parse(component.Message.Embeds.First().Title.Split().Last());
@@ -170,7 +170,7 @@ class Program
                 
                 if (currentPage <= 1)
                 {
-                    await component.RespondAsync("This is the first page!", ephemeral: true);
+                    await component.RespondAsync("첫 페이지입니다!", ephemeral: true);
                     return;
                 }
                 await component.UpdateAsync(msg =>
@@ -193,7 +193,7 @@ class Program
                 int maxPage = (int)Math.Ceiling((double)dict.Count / 10);
                 if (currentPage >= maxPage)
                 {
-                    await component.RespondAsync("This is the last page!", ephemeral: true);
+                    await component.RespondAsync("마지막 페이지입니다!", ephemeral: true);
                     return;
                 }
 
@@ -222,9 +222,9 @@ class Program
                     string userId = modal.User.Id.ToString();
                     
                     var embed = new EmbedBuilder().WithTitle("이슈를 DB에 등록했습니다.")
-                        .AddField("Issue Name", values[0])
-                        .AddField("Issue Tag", values[1])
-                        .AddField("Issue Detail", values[2])
+                        .AddField("이슈 이름", values[0])
+                        .AddField("이슈 태그", values[1])
+                        .AddField("이슈 설명", values[2])
                         .WithColor(Color.Blue)
                         .WithCurrentTimestamp()
                         .Build();
@@ -244,9 +244,9 @@ class Program
                     {
                         var errorEmbed = new EmbedBuilder().WithTitle("이슈 등록에 실패했습니다.")
                             .WithColor(Color.Red)
-                            .AddField("Issue Name", values[0])
-                            .AddField("Issue Tag", values[1])
-                            .AddField("Issue Detail", values[2])
+                            .AddField("이슈 이름", values[0])
+                            .AddField("이슈 태그", values[1])
+                            .AddField("이슈 설명", values[2])
                             .WithCurrentTimestamp()
                             .Build();
                         await modal.RespondAsync(embed: errorEmbed, ephemeral: false);

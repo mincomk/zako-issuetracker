@@ -7,8 +7,8 @@ public static class Pages
     public static ComponentBuilder Button()
     {
         var buttons = new ComponentBuilder()
-            .WithButton(label: "Previous", customId: "issue-previous", style: ButtonStyle.Primary, new Emoji("⬅️"))
-            .WithButton(label: "Next", customId: "issue-next", style: ButtonStyle.Secondary, new Emoji("➡️"));
+            .WithButton(label: "이전", customId: "issue-previous", style: ButtonStyle.Primary, new Emoji("⬅️"))
+            .WithButton(label: "다음", customId: "issue-next", style: ButtonStyle.Secondary, new Emoji("➡️"));
 
         return buttons;
     }
