@@ -170,16 +170,13 @@ class Program
                 
                 if (currentPage <= 1)
                 {
-<<<<<<< HEAD
-                    await component.RespondAsync("This is the first page!", ephemeral: false);
-=======
                     await component.RespondAsync("첫 페이지입니다!", ephemeral: true);
->>>>>>> translation
                     return;
                 }
+                
+                Dictionary<int, Issue.IssueContent> dict = await Issue.IssueData.ListOfIssueAsync(tag);
                 await component.UpdateAsync(msg =>
                     { 
-                        Dictionary<int, Issue.IssueContent> dict = Issue.IssueData.ListOfIssue(tag); 
                         msg.Embed = commands.IssueListEmbed.BuildIssueListEmbed(dict,--currentPage, tag).Build();
                     });
 
@@ -193,15 +190,11 @@ class Program
                 else
                     tag = null;
                 
-                Dictionary<int, Issue.IssueContent> dict = Issue.IssueData.ListOfIssue(tag);
+                Dictionary<int, Issue.IssueContent> dict = await Issue.IssueData.ListOfIssueAsync(tag);
                 int maxPage = (int)Math.Ceiling((double)dict.Count / 10);
                 if (currentPage >= maxPage)
                 {
-<<<<<<< HEAD
-                    await component.RespondAsync("This is the last page!", ephemeral: false);
-=======
                     await component.RespondAsync("마지막 페이지입니다!", ephemeral: true);
->>>>>>> translation
                     return;
                 }
 
@@ -239,7 +232,7 @@ class Program
                     bool result;
                     try
                     {
-                         result = Issue.IssueData.StoreIssue(values[0].ToString(), values[2].ToString(),
+                         result = await Issue.IssueData.StoreIssueAsync(values[0].ToString(), values[2].ToString(),
                             Enum.Parse<IssueTag>(values[1].ToString(), true), userId);
                     }
                     catch (Exception e)
@@ -257,7 +250,7 @@ class Program
                             .AddField("이슈 설명", values[2])
                             .WithCurrentTimestamp()
                             .Build();
-                        await modal.RespondAsync(embed: errorEmbed, ephemeral: false);
+                        await modal.RespondAsync(embed: errorEmbed, ephemeral: true);
                     }
                     else
                     {
@@ -316,7 +309,7 @@ class Program
                             bool result;
                             try
                             {
-                                result = Issue.IssueData.UpdateIssueStatus((int)issueId, newStatus);
+                                result = await Issue.IssueData.UpdateIssueStatusAsync((int)issueId, newStatus);
                             }
                             catch (Exception e)
                             {
@@ -328,10 +321,10 @@ class Program
                             {
                                 var eb = new EmbedBuilder()
                                     .WithTitle("오류가 발생했습니다")
-                                    .WithDescription("나도 몰라")
+                                    .WithDescription("상태 변경에 실패했습니다")
                                     .WithColor(Color.Red)
                                     .WithCurrentTimestamp();
-                                await slashCommand.RespondAsync(embed: eb.Build(), ephemeral: false);
+                                await slashCommand.RespondAsync(embed: eb.Build(), ephemeral: true);
                             }
                             else
                             {
@@ -354,7 +347,7 @@ class Program
                             if (!string.IsNullOrEmpty(tagStr))
                                 tag = Enum.Parse<IssueTag>(tagStr, true);
                             
-                            Dictionary<int, Issue.IssueContent> dict = Issue.IssueData.ListOfIssue(tag);
+                            Dictionary<int, Issue.IssueContent> dict = await Issue.IssueData.ListOfIssueAsync(tag);
                             
                             await slashCommand.RespondAsync
                                 (embed: commands.IssueListEmbed.BuildIssueListEmbed(dict,1 , tag).Build(),
@@ -367,10 +360,9 @@ class Program
                             IssueTag? tag = null;
                             if (!string.IsNullOrEmpty(tagStr))
                                 tag = Enum.Parse<IssueTag>(tagStr, true);
-                            var dict = Issue.IssueData.ListOfIssue(tag);
+                            var dict = await Issue.IssueData.ListOfIssueAsync(tag);
 
                             var jsonList = new List<Issue.IssueJsonContent>(dict.Count);
-                            // {{id, name, detail, tag, status, userid},{id, name, detail, tag, status, userid}, ....}
                             foreach (var ctx in dict)
                             {
                                 jsonList.Add(new IssueJsonContent()
@@ -393,7 +385,6 @@ class Program
                             string finalJson = JsonSerializer.Serialize(jsonList, options);
                             
                             string msg = "```json\n" + finalJson + "\n```";
-                            //Console.WriteLine(msg);
                             
                             await slashCommand.RespondAsync(msg, ephemeral: true);
                         }
@@ -403,15 +394,15 @@ class Program
                             var issueId = (long)slashCommand.Data.Options.First().Options
                                 .First(o => o.Name == "id").Value;
                             
-                            var ctx = Issue.IssueData.GetIssueById((int)issueId);
+                            var ctx = await Issue.IssueData.GetIssueByIdAsync((int)issueId);
                             if (ctx == null)
                             {
                                 var eb = new EmbedBuilder()
                                     .WithTitle("오류가 발생했습니다")
-                                    .WithDescription("나도 몰라")
+                                    .WithDescription("해당 이슈를 찾을 수 없습니다")
                                     .WithColor(Color.Red)
                                     .WithCurrentTimestamp();
-                                await slashCommand.RespondAsync(embed: eb.Build(), ephemeral: false);
+                                await slashCommand.RespondAsync(embed: eb.Build(), ephemeral: true);
                             }
                             else
                             {
