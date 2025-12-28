@@ -79,7 +79,7 @@ class Program
         }
 
         var issueStatusChoices = new SlashCommandOptionBuilder()
-            .WithName("status")
+            .WithName("change-to")
             .WithDescription("이슈 상태 선택")
             //.WithRequired(true)
             .WithType(ApplicationCommandOptionType.String);
