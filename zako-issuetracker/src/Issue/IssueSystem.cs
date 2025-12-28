@@ -153,8 +153,11 @@ public class IssueData
             await using var con = new SqliteConnection("Data Source=" + DataBaseHelper.dbPath);
             await con.OpenAsync();
             await using var cmd = con.CreateCommand();
-            cmd.CommandText = "UPDATE zako SET (status, name, detail) VALUES (3, \"\", \"\") WHERE id = @id";
+            cmd.CommandText = "UPDATE zako SET (status, name, detail) VALUES (@status, @name, @detail) WHERE id = @id";
             cmd.Parameters.AddWithValue("@id", issueId);
+            cmd.Parameters.AddWithValue("@status", IssueStatus.Deleted);
+            cmd.Parameters.AddWithValue("@name", "Deleted Issue");
+            cmd.Parameters.AddWithValue("@detail", "Deleted by admin.");
             
             int rowsAffected = await cmd.ExecuteNonQueryAsync();
             return rowsAffected > 0;

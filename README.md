@@ -10,16 +10,18 @@ Zako IssueTracker ♥ for minco
 
 ## creating database
 ```sql
-create table zako(
-    tag int,
-    status int,
-    name text,
-    detail text,
-    discord text
-);
+CREATE TABLE IF NOT EXISTS zako(
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  tag INTEGER NOT NULL,
+  status INTEGER NOT NULL, 
+  name TEXT NOT NULL, 
+  detail text NOT NULL, 
+  discord text NOT NULL);
 ```
 tag = IssueTag, Status = Issue Status, name = Issue Name, Detial = Issue Detail, Discord = UserId
 <br>~~discord를 넣는 이유는 검열용~~
+
+
 
 ## plans
 
