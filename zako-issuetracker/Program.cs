@@ -77,7 +77,7 @@ class Program
         }
 
         var issueStatusChoices = new SlashCommandOptionBuilder()
-            .WithName("change-to")
+        //    .WithName("change-to")
             .WithDescription("이슈 상태 선택")
             //.WithRequired(true)
             .WithType(ApplicationCommandOptionType.String);
@@ -123,7 +123,7 @@ class Program
                     .WithDescription("이슈 ID")
                     .WithRequired(true)
                     .WithType(ApplicationCommandOptionType.Integer))
-                .AddOption(issueStatusChoices.WithRequired(true))
+                .AddOption(issueStatusChoices.WithName("change-to").WithRequired(true))
                 .WithType(ApplicationCommandOptionType.SubCommand)
             )
             // list
@@ -131,7 +131,7 @@ class Program
                 .WithName("list")
                 .WithDescription("이슈 목록")
                 .AddOption(issueTagChoices) // list (<enum> Tag tag).WithType(ApplicationCommandOptionType.Boolean))
-                .AddOption(issueStatusChoices.WithRequired(false))
+                .AddOption(issueStatusChoices.WithName("status").WithRequired(false))
                 .WithType(ApplicationCommandOptionType.SubCommand))
             .AddOption(new SlashCommandOptionBuilder()
                 .WithName("export")
@@ -348,13 +348,10 @@ class Program
 
                                 await slashCommand.RespondAsync(embed: eb.Build(), ephemeral: false);
                             }
-                            
                         }
                             break;
                         case "list":
                         {
-                            
-                            
                             string? tagStr = slashCommand.Data.Options.First().Options.FirstOrDefault()?.Value?.ToString();
                             IssueTag? tag = null;
                             if (!string.IsNullOrEmpty(tagStr))
