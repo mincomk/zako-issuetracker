@@ -29,7 +29,7 @@ public static class IssueListEmbed
                 .WithTimestamp(DateTimeOffset.Now);
             
             
-            eb.AddField($"ID : {ctx.Key.ToString()}",
+            eb.AddField($"ID : {ctx.Key}",
                 $"Name : {ctx.Value.Name}\n" +
                 $"Detail : {ctx.Value.Detail}\n"+
                 $"Tag : {ctx.Value.Tag.ToString()}\n"+
@@ -39,7 +39,6 @@ public static class IssueListEmbed
             
             embeds.Add(eb.Build());
         }
-        //eb[PageSize+1].WithFooter($"Page {page} | Total Issues: {dict.Count}");
         
         return embeds.ToArray();
     }
