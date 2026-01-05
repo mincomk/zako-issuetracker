@@ -25,7 +25,7 @@ pipeline {
         stage('Kubernetes Reload') {
             steps {
                 container('kubectl') {
-                    withKubeConfig([credentialsId: 'kubeconfig-c1', serverUrl: 'https://walruslab.org:6443']) {
+                    withKubeConfig([credentialsId: 'kubeconfig-c1', serverUrl: 'https://walruslab.org:6443', clusterName: 'walrus-c1']) {
                         sh 'kubectl rollout restart deployment zako-it -n zako2'
                     }
                 }
