@@ -387,6 +387,19 @@ class Program
                                 status = Enum.Parse<IssueStatus>(statusStr, true);
                             
                             Dictionary<int, Issue.IssueContent> dict = await Issue.IssueData.ListOfIssueAsync(tag);
+
+                            if (dict.Count == 0)
+                            { 
+                                var eb = new EmbedBuilder()
+                                        .WithTitle("없어요 없어요")
+                                        .WithDescription("이슈가 없어요")
+                                        .WithImageUrl("https://images-ext-1.discordapp.net/external/LW9RcGpKGrWOOu5bbcPC85dnnbN6hVXBVWL_xKu_AA8/%3Fsize%3D4096/https/cdn.discordapp.com/avatars/1365312197613453322/43da9fd0741f4657f2344deb2062c0ca.png")
+                                        .WithColor(Color.Red)
+                                        .WithCurrentTimestamp();
+                                await slashCommand.RespondAsync(embed: eb.Build(), ephemeral: false);
+
+                                break;
+                            }
                             
                             await slashCommand.RespondAsync
                                 (embeds: commands.IssueListEmbed.BuildIssueListEmbed(dict,1 , tag, status),
