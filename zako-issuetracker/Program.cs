@@ -46,6 +46,8 @@ class Program
         var cmd = con.CreateCommand();
         cmd.CommandText = "CREATE TABLE IF NOT EXISTS zako(id INTEGER PRIMARY KEY AUTOINCREMENT, tag INTEGER NOT NULL, status INTEGER NOT NULL, name TEXT NOT NULL, detail text NOT NULL, discord text NOT NULL)";
         cmd.ExecuteNonQuery();
+        cmd.CommandText = "CREATE TABLE IF NOT EXISTS zakonim(id TEXT PRIMARY KEY NOT NULL, description TEXT NOT NULL)";
+        cmd.ExecuteNonQuery();
         con.Close();
         
         await _client.LoginAsync(TokenType.Bot, botToken); //or, read from console
@@ -60,7 +62,7 @@ class Program
         Console.WriteLine(log.ToString());
         return Task.CompletedTask;
     }
-    
+
     private static async Task ReadyAsync()
     {
         Console.WriteLine($"{_client.CurrentUser} is connected!");
@@ -77,7 +79,7 @@ class Program
         }
 
         var issueStatusChoices = new SlashCommandOptionBuilder()
-        //    .WithName("change-to")
+            //    .WithName("change-to")
             .WithDescription("이슈 상태 선택")
             //.WithRequired(true)
             .WithType(ApplicationCommandOptionType.String);
@@ -86,18 +88,18 @@ class Program
         {
             issueStatusChoices.AddChoice(status, status.ToLowerInvariant());
         }
-        
+
         var newIssue = new SlashCommandBuilder()
             .WithName("issue")
             .WithDescription("Root of issue commands")
             //.AddOptions(new SlashCommandOptionBuilder())
             .WithNameLocalizations(new Dictionary<string, string>
             {
-                {"ko","이슈"}
+                { "ko", "이슈" }
             })
             .WithDescriptionLocalizations(new Dictionary<string, string>
             {
-                {"ko","이슈 명령어 최상위 식별자(?)"}
+                { "ko", "이슈 명령어 최상위 식별자(?)" }
             })
             //get
             .AddOption(new SlashCommandOptionBuilder()
@@ -124,8 +126,7 @@ class Program
                     .WithRequired(true)
                     .WithType(ApplicationCommandOptionType.Integer))
                 .AddOption(issueStatusChoices.WithName("change-to").WithRequired(true))
-                .WithType(ApplicationCommandOptionType.SubCommand)
-            )
+                .WithType(ApplicationCommandOptionType.SubCommand))
             // list
             .AddOption(new SlashCommandOptionBuilder()
                 .WithName("list")
@@ -145,16 +146,38 @@ class Program
                     .WithName("id")
                     .WithDescription("이슈 ID")
                     .WithRequired(true)
-                    .WithType(ApplicationCommandOptionType.Integer)))
+                    .WithType(ApplicationCommandOptionType.Integer))
+                .WithType(ApplicationCommandOptionType.SubCommand))
             .Build();
-        
+
         var ping = new SlashCommandBuilder()
             .WithName("ping")
             .WithDescription("Pong!")
             .Build();
 
+        var zakonim = new SlashCommandBuilder()
+            .WithName("zakonim")
+            .WithDescription("Hello zako!")
+            .WithNameLocalizations(new Dictionary<string, string>{{"ko", "자코님"}})
+            .WithDescriptionLocalizations(new Dictionary<string, string>{{"ko", "허접님"}})
+            .AddOption(new SlashCommandOptionBuilder()
+                .WithName("who")
+                .WithDescription("who is zako")
+                .WithNameLocalizations(new Dictionary<string, string> {{"ko", "누가"}})
+                .WithDescriptionLocalizations(new Dictionary<string, string>{{"ko", "누가 허접인가"}})
+                .WithRequired(true)
+                .WithType(ApplicationCommandOptionType.User))
+            .AddOption(new SlashCommandOptionBuilder()
+                .WithName("description")
+                .WithDescription("zakonim!")
+                .WithNameLocalizations(new Dictionary<string, string>{{"ko", "설명"}})
+                .WithRequired(true)
+                .WithType(ApplicationCommandOptionType.String))
+            .Build();
+        
         await _client.CreateGlobalApplicationCommandAsync(newIssue);
         await _client.CreateGlobalApplicationCommandAsync(ping);
+        await _client.CreateGlobalApplicationCommandAsync(zakonim);
     }
     
     private static async Task MessageReceivedAsync(SocketMessage message)
@@ -270,7 +293,7 @@ class Program
                 }   
                     break;
                 default:
-                    //await modal.RespondAsync("Undefined command");
+                    await modal.RespondAsync("Undefined command", ephemeral:true);
                     break;
             }
         }
@@ -479,6 +502,81 @@ class Program
                     break;
                 case "ping":
                     await slashCommand.RespondAsync($"Pong! {_client.Latency}");
+                    break;
+                case "zakonim":
+                {
+                    SocketUser who = (SocketUser)slashCommand.Data.Options.First(o => o.Name == "who").Value;
+                    string description = slashCommand.Data.Options.First(o => o.Name == "description").Value.ToString() ?? "No description";
+
+                    using var con = new SqliteConnection("Data Source=" + DataBaseHelper.dbPath);
+                    con.Open();
+                    var cmd = con.CreateCommand();
+                    try
+                    {
+                        cmd.CommandText = "INSERT INTO zakonim (id, description) VALUES (@id, @description)";
+                        cmd.Parameters.AddWithValue("@id", who.Id.ToString());
+                        cmd.Parameters.AddWithValue("@description", description);
+                        await cmd.ExecuteNonQueryAsync();
+                        
+                        cmd.CommandText = "SELECT COUNT(*) FROM zakonim";
+                        await using var reader = await cmd.ExecuteReaderAsync();
+                        
+                        int count = 0;
+                        if (await reader.ReadAsync())
+                        {
+                            count = reader.GetInt32(0);
+                        }
+                        var eb = new EmbedBuilder()
+                            .WithTitle("당신은 허접입니다")
+                            .WithDescription($"자코님 DB에 {who.Mention} 사용자 등록 완료!")
+                            .AddField("설명", description)
+                            .AddField("지금까지 자코님을 부른 사람", $"{count}명");
+                        await slashCommand.RespondAsync(embed: eb.Build(), ephemeral: false);
+                    }
+                    catch (SqliteException e)
+                    {
+                        int code = e.SqliteErrorCode;
+                        
+                        var eb = new EmbedBuilder();
+                        if(code == 19) // UNIQUE constraint failed
+                        {
+                            eb = new EmbedBuilder()
+                                .WithTitle("이미 허접입니다")
+                                .WithDescription($"{who.Mention}님은 이미 자코님 DB에 등록되어 있습니다.")
+                                .WithColor(Color.Orange)
+                                .WithCurrentTimestamp();
+                            await slashCommand.RespondAsync(embed: eb.Build(), ephemeral: true);
+                            break;
+                        }
+                        else
+                        {
+                            eb = new EmbedBuilder()
+                                .WithTitle("??")
+                                .WithDescription("오류남")
+                                .WithColor(Color.DarkRed)
+                                .WithCurrentTimestamp();
+                            await slashCommand.RespondAsync(embed: eb.Build(), ephemeral: false);
+                        }
+                        
+                        Console.WriteLine(e);
+                    }
+                    catch (Exception e)
+                    {
+                        var eb = new EmbedBuilder()
+                            .WithTitle("???")
+                            .WithDescription("오류남")
+                            .WithColor(Color.Red)
+                            .WithCurrentTimestamp();
+                        
+                        await slashCommand.RespondAsync(embed:eb.Build(), ephemeral: true);
+                        
+                        Console.WriteLine(e);
+                    }
+                    finally
+                    {
+                        con.Close();
+                    }
+                }
                     break;
                 default:
                     await slashCommand.RespondAsync("Unknown command");
