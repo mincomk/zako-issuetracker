@@ -265,7 +265,7 @@ class Program
                     catch (Exception e)
                     {
                         result = false;
-                        Console.WriteLine(e.Message);
+                        Console.Error.WriteLine(e.Message);
                     }
                     
                     if (!result)
@@ -341,7 +341,7 @@ class Program
                             catch (Exception e)
                             {
                                 result = false;
-                                Console.WriteLine(e.Message);
+                                Console.Error.WriteLine(e.Message);
                             }
 
                             if (!result)
@@ -563,7 +563,7 @@ class Program
                             await slashCommand.RespondAsync(embed: eb.Build(), ephemeral: false);
                         }
                         
-                        Console.WriteLine(e);
+                        Console.Error.WriteLine(e);
                     }
                     catch (Exception e)
                     {
@@ -575,7 +575,7 @@ class Program
                         
                         await slashCommand.RespondAsync(embed:eb.Build(), ephemeral: true);
                         
-                        Console.WriteLine(e);
+                        Console.Error.WriteLine(e);
                     }
                     finally
                     {

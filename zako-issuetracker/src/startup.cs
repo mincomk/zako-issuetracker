@@ -28,7 +28,7 @@ public static class Startup
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            Console.Error.WriteLine(e);
             throw;
         }
         
