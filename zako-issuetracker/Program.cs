@@ -40,15 +40,8 @@ class Program
         _client.Ready += ReadyAsync;
         _client.MessageReceived += MessageReceivedAsync;
         _client.InteractionCreated += InteractionCreatedAsync;
-
-        var con = new SqliteConnection("Data Source=" + DataBaseHelper.dbPath);
-        con.Open();
-        var cmd = con.CreateCommand();
-        cmd.CommandText = "CREATE TABLE IF NOT EXISTS zako(id INTEGER PRIMARY KEY AUTOINCREMENT, tag INTEGER NOT NULL, status INTEGER NOT NULL, name TEXT NOT NULL, detail text NOT NULL, discord text NOT NULL)";
-        cmd.ExecuteNonQuery();
-        cmd.CommandText = "CREATE TABLE IF NOT EXISTS zakonim(id TEXT PRIMARY KEY NOT NULL, description TEXT NOT NULL)";
-        cmd.ExecuteNonQuery();
-        con.Close();
+        
+        Startup.StartupCheck();
         
         await _client.LoginAsync(TokenType.Bot, botToken); //or, read from console
         
@@ -272,7 +265,7 @@ class Program
                     catch (Exception e)
                     {
                         result = false;
-                        Console.WriteLine(e.Message);
+                        Console.Error.WriteLine(e.Message);
                     }
                     
                     if (!result)
@@ -348,7 +341,7 @@ class Program
                             catch (Exception e)
                             {
                                 result = false;
-                                Console.WriteLine(e.Message);
+                                Console.Error.WriteLine(e.Message);
                             }
 
                             if (!result)
@@ -570,7 +563,7 @@ class Program
                             await slashCommand.RespondAsync(embed: eb.Build(), ephemeral: false);
                         }
                         
-                        Console.WriteLine(e);
+                        Console.Error.WriteLine(e);
                     }
                     catch (Exception e)
                     {
@@ -582,7 +575,7 @@ class Program
                         
                         await slashCommand.RespondAsync(embed:eb.Build(), ephemeral: true);
                         
-                        Console.WriteLine(e);
+                        Console.Error.WriteLine(e);
                     }
                     finally
                     {
