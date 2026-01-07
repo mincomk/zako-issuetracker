@@ -532,10 +532,9 @@ class Program
                             count = reader.GetInt32(0);
                         }
                         var eb = new EmbedBuilder()
-                            .WithTitle("당신은 허접입니다")
-                            .WithDescription($"자코님 DB에 {who.Mention} 사용자 등록 완료!")
-                            .AddField("설명", description)
-                            .AddField("지금까지 자코님을 부른 사람", $"{count}명");
+                            .WithTitle("자코는 봇이에요!")
+                            .WithDescription($"{who.Mention}님은 {count}번째로 자코를 사람으로 오해하셨습니다.")
+                            .AddField("멘트", description)
                         await slashCommand.RespondAsync(embed: eb.Build(), ephemeral: false);
                     }
                     catch (SqliteException e)
