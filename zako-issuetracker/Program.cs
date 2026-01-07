@@ -534,7 +534,7 @@ class Program
                         var eb = new EmbedBuilder()
                             .WithTitle("자코는 봇이에요!")
                             .WithDescription($"{who.Mention}님은 {count}번째로 자코를 사람으로 오해하셨습니다.")
-                            .AddField("멘트", description)
+                            .AddField("멘트", description);
                         await slashCommand.RespondAsync(embed: eb.Build(), ephemeral: false);
                     }
                     catch (SqliteException e)
