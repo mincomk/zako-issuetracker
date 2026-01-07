@@ -6,7 +6,6 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["zako-issuetracker/zako-issuetracker.csproj", "zako-issuetracker/"]
 COPY nuget.config .
-COPY netPkg ./netPkg
 RUN dotnet restore "zako-issuetracker/zako-issuetracker.csproj"
 COPY . .
 WORKDIR "/src/zako-issuetracker"
