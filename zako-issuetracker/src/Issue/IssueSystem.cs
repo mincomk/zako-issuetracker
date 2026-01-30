@@ -168,9 +168,26 @@ public class IssueData
         }
     }
 
-    public static async Task<bool> UpdateIssueAsync(IssueContent issueContent)
+    public static async Task<bool> UpdateIssueAsync(IssueJsonContent issueContent)
     {
-        return true;
+        try
+        {
+            await using var con = new SqliteConnection("Data Source=" + DataBaseHelper.dbPath);
+            await con.OpenAsync();
+
+            await using var cmd = con.CreateCommand();
+            cmd.CommandText = "UPDATE zako SET name = @name, detail = @detail, tag = @tag WHERE id = @id";
+            cmd.Parameters.AddWithValue("@id", issueContent.Id);
+            cmd.Parameters.AddWithValue("@name", issueContent.Name);
+            cmd.Parameters.AddWithValue("@detail", issueContent.Detail);
+            cmd.Parameters.AddWithValue("@tag", issueContent.Tag.ToString());
+            return await cmd.ExecuteNonQueryAsync() > 0;
+        }
+        catch (Exception e)
+        {
+            Console.Error.WriteLine(e);
+            return false;
+        }
     }
     
     #region ["Obsolete Sync Wrappers"]
