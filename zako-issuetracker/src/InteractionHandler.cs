@@ -72,14 +72,39 @@ partial class Program
             if (modal.Data.CustomId.StartsWith("ISSUE_MODAL_EDIT__"))
             {
                 int id = int.Parse(modal.Data.CustomId.Substring("ISSUE_MODAL_EDIT__".Length));
+                //check user permission
+                {
+                    var issue = await IssueData.GetIssueByIdAsync(id);
 
+                    // modification permission check
+                    if (issue == null || issue.Value.Status == IssueStatus.Deleted)
+                    {
+                        var eb = new EmbedBuilder()
+                            .WithTitle("오류가 발생했습니다")
+                            .WithDescription("해당 이슈가 없던지 지워졌던지")
+                            .WithColor(Color.Red)
+                            .WithCurrentTimestamp();
+                        await modal.RespondAsync(embed: eb.Build(), ephemeral: false);
+                    }
+
+                    if (issue.Value.UserId.ToString() != modal.User.Id.ToString()
+                        && !AdminTool.IsAdmin(modal.User.Id.ToString()))
+                    {
+                        var eb = new EmbedBuilder()
+                            .WithTitle("오류가 발생했습니다")
+                            .WithDescription("남의 것을 탐하지 마라")
+                            .WithColor(Color.Red)
+                            .WithCurrentTimestamp();
+                        await modal.RespondAsync(embed: eb.Build(), ephemeral: false);
+                    }
+                }
+                
                 var c = modal.Data.Components.ToArray();
                 object[] values = new object[c.Length];
                 for (int i = 0; i < c.Length; i++)
                     values[i] = c[i].Value ?? "NULL";
 
                 values[1] = c[1].Values.First();
-                //Console.WriteLine($"values[1] = {values[1]}");
 
                 var embed = new EmbedBuilder().WithTitle("수정된 이슈를 DB에 등록했습니다.")
                     .AddField("이슈 이름", values[0])
@@ -367,9 +392,34 @@ partial class Program
                             break;
                         case "delete":
                         {
-                            int Id = (int)(long)slashCommand.Data.Options.First().Options.First(o => o.Name == "id")
-                                .Value;
+                            int Id = (int)(long)slashCommand.Data.Options.First()
+                                .Options.First(o => o.Name == "id").Value;
 
+                            // user permission check
+                            
+                            var issue = await IssueData.GetIssueByIdAsync(Id);
+                            if (issue == null || issue.Value.Status == IssueStatus.Deleted)
+                            {
+                                var eb = new EmbedBuilder()
+                                    .WithTitle("오류가 발생했습니다")
+                                    .WithDescription("해당 이슈가 없던지 지워졌던지")
+                                    .WithColor(Color.Red)
+                                    .WithCurrentTimestamp();
+                                await slashCommand.RespondAsync(embed: eb.Build(), ephemeral: false);
+                                break;
+                            }
+                            if (!AdminTool.IsAdmin(slashCommand.User.Id.ToString()))
+                            {
+                                var eb = new EmbedBuilder()
+                                    .WithTitle("오류가 발생했습니다")
+                                    .WithDescription("감히 관리자를 무시하다니")
+                                    .WithColor(Color.Red)
+                                    .WithCurrentTimestamp();
+                                await slashCommand.RespondAsync(embed: eb.Build(), ephemeral: false);
+                                break;
+                            }
+                            
+                            // action
                             bool result;
                             try
                             {
@@ -417,7 +467,7 @@ partial class Program
                                 break;
                             }
 
-                            if (result.Value.Status.ToString() != slashCommand.User.Id.ToString()
+                            if (result.Value.UserId.ToString() != slashCommand.User.Id.ToString()
                                 && !AdminTool.IsAdmin(slashCommand.User.Id.ToString()))
                             {
                                 var eb = new EmbedBuilder()
