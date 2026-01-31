@@ -59,7 +59,7 @@ public class IssueData
             await using var con = new SqliteConnection("Data Source=" + DataBaseHelper.dbPath);
             await con.OpenAsync();
             await using var cmd = con.CreateCommand();
-            cmd.CommandText = "UPDATE zako SET status = @status WHERE ROWID = @id";
+            cmd.CommandText = "UPDATE zako SET status = @status WHERE id = @id";
             cmd.Parameters.AddWithValue("@status", newStatus.ToString());
             cmd.Parameters.AddWithValue("@id", issueId);
 
@@ -83,7 +83,7 @@ public class IssueData
             await using var con = new SqliteConnection("Data Source=" + DataBaseHelper.dbPath);
             await con.OpenAsync();
             await using var cmd = con.CreateCommand();
-            cmd.CommandText = "SELECT ROWID, name, detail, tag, status, discord FROM zako WHERE tag LIKE @tag AND status LIKE @status";
+            cmd.CommandText = "SELECT id, name, detail, tag, status, discord FROM zako WHERE tag LIKE @tag AND status LIKE @status";
             cmd.Parameters.AddWithValue("@tag", cTag);
             cmd.Parameters.AddWithValue("@status", cStatus);
 
@@ -118,7 +118,7 @@ public class IssueData
             await using var con = new SqliteConnection("Data Source=" + DataBaseHelper.dbPath);
             await con.OpenAsync();
             await using var cmd = con.CreateCommand();
-            cmd.CommandText = "SELECT name, detail, tag, status, discord  FROM zako WHERE ROWID = @id";
+            cmd.CommandText = "SELECT name, detail, tag, status, discord  FROM zako WHERE id = @id";
             cmd.Parameters.AddWithValue("@id", issueId);
             await using var reader = await cmd.ExecuteReaderAsync();
             if (!await reader.ReadAsync())
