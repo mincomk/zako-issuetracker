@@ -52,7 +52,15 @@ public class IssueData
             idCmd.Parameters.AddWithValue("@tag", tag.ToString());
 
             await using var reader = await idCmd.ExecuteReaderAsync();
-            id = reader.GetInt32(0);
+            if (await reader.ReadAsync())
+            {
+                id = reader.GetInt32(0);
+            }
+            else
+            {
+                id = -1;
+            }
+
             return id;
         }
         catch (Exception)
