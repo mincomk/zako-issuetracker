@@ -45,12 +45,13 @@ public class IssueData
             
             // Get stored issue id
             int id;
-            cmd.CommandText = "SELECT id FROM zako WHERE name = @name AND discord=@discord AND tag=@tag ORDER BY id DESC LIMIT 1";
-            cmd.Parameters.AddWithValue("@name", name);
-            cmd.Parameters.AddWithValue("@discord", userId);
-            cmd.Parameters.AddWithValue("@tag", tag.ToString());
+            await using var idCmd = con.CreateCommand();
+            idCmd.CommandText = "SELECT id FROM zako WHERE name = @name AND discord=@discord AND tag=@tag ORDER BY id DESC LIMIT 1";
+            idCmd.Parameters.AddWithValue("@name", name);
+            idCmd.Parameters.AddWithValue("@discord", userId);
+            idCmd.Parameters.AddWithValue("@tag", tag.ToString());
 
-            using var reader = await cmd.ExecuteReaderAsync();
+            await using var reader = await idCmd.ExecuteReaderAsync();
             id = reader.GetInt32(0);
             return id;
         }
