@@ -165,14 +165,8 @@ partial class Program
 
                     string userId = modal.User.Id.ToString();
 
-                    var embed = new EmbedBuilder().WithTitle("이슈를 DB에 등록했습니다.")
-                        .AddField("이슈 이름", values[0])
-                        .AddField("이슈 태그", values[1])
-                        .AddField("이슈 설명", values[2])
-                        .WithColor(Color.Blue)
-                        .WithCurrentTimestamp()
-                        .Build();
-                    bool result;
+                    
+                    int result;
                     try
                     {
                         result = await Issue.IssueData.StoreIssueAsync(values[0].ToString(), values[2].ToString(),
@@ -180,11 +174,20 @@ partial class Program
                     }
                     catch (Exception e)
                     {
-                        result = false;
+                        result = -1;
                         Console.Error.WriteLine(e.Message);
                     }
+                    
+                    var embed = new EmbedBuilder().WithTitle("이슈를 DB에 등록했습니다.")
+                        .WithDescription($"이슈 ID : {result}")
+                        .AddField("이슈 이름", values[0])
+                        .AddField("이슈 태그", values[1])
+                        .AddField("이슈 설명", values[2])
+                        .WithColor(Color.Blue)
+                        .WithCurrentTimestamp()
+                        .Build();
 
-                    if (!result)
+                    if (result == -1)
                     {
                         var errorEmbed = new EmbedBuilder().WithTitle("이슈 등록에 실패했습니다.")
                             .WithColor(Color.Red)

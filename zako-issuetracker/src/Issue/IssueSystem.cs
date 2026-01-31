@@ -23,10 +23,10 @@ public class IssueJsonContent
 
 public class IssueData
 {
-    public static async Task<bool> StoreIssueAsync(string? name, string? detail, IssueTag? tag, string userId)
+    public static async Task<int> StoreIssueAsync(string? name, string? detail, IssueTag? tag, string userId)
     {
         if (name == null || detail == null || tag == null)
-            return false;
+            return -1;
 
         try
         {
@@ -41,11 +41,22 @@ public class IssueData
             cmd.Parameters.AddWithValue("@discord", userId);
 
             await cmd.ExecuteNonQueryAsync();
-            return true;
+            
+            
+            // Get stored issue id
+            int id;
+            cmd.CommandText = "SELECT id FROM zako WHERE name = @name AND discord=@discord AND tag=@tag ORDER BY id DESC LIMIT 1";
+            cmd.Parameters.AddWithValue("@name", name);
+            cmd.Parameters.AddWithValue("@discord", userId);
+            cmd.Parameters.AddWithValue("@tag", tag.ToString());
+
+            using var reader = await cmd.ExecuteReaderAsync();
+            id = reader.GetInt32(0);
+            return id;
         }
         catch (Exception)
         {
-            return false;
+            return -1;
         }
     }
     
@@ -192,7 +203,7 @@ public class IssueData
     
     #region ["Obsolete Sync Wrappers"]
     [Obsolete("Use StoreIssueAsync instead")]
-    public static bool StoreIssue(string? name, string? detail, IssueTag? tag, string userId)
+    public static int StoreIssue(string? name, string? detail, IssueTag? tag, string userId)
         => StoreIssueAsync(name, detail, tag, userId).GetAwaiter().GetResult();
     
     [Obsolete("Use UpdateIssueStatusAsync instead")]
