@@ -7,7 +7,7 @@ steps:
   image: plugins/docker
   settings:
     context: zako-issuetracker
-    dockerfile: zako-issuetracker/Dockerfile
+    dockerfile: Dockerfile
     repo: registry.walruslab.org/common/zako-issuetracker
     tags: latest
     registry: registry.walruslab.org
