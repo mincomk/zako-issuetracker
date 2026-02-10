@@ -1,0 +1,40 @@
+kind: pipeline
+type: docker
+name: build-and-notify
+
+steps:
+- name: build-docker-image
+  image: plugins/docker
+  settings:
+    context: zako-issuetracker
+    dockerfile: zako-issuetracker/Dockerfile
+    repo: registry.walruslab.org/common/zako-issuetracker
+    tags: latest
+    username:
+      from_secret: docker_username
+    password:
+      from_secret: docker_password
+
+- name: notify-discord-success
+  image: appleboy/drone-discord
+  settings:
+    webhook_id:
+      from_secret: discord_webhook_id
+    webhook_token:
+      from_secret: discord_webhook_token
+    message: "Built Docker image successfully. Build URL: ${DRONE_BUILD_LINK}"
+  when:
+    status:
+      - success
+
+- name: notify-discord-failure
+  image: appleboy/drone-discord
+  settings:
+    webhook_id:
+      from_secret: discord_webhook_id
+    webhook_token:
+      from_secret: discord_webhook_token
+    message: "Build or push failed. Check logs: ${DRONE_BUILD_LINK}"
+  when:
+    status:
+      - failure
