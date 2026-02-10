@@ -23,10 +23,10 @@ public class IssueJsonContent
 
 public class IssueData
 {
-    public static async Task<bool> StoreIssueAsync(string? name, string? detail, IssueTag? tag, string userId)
+    public static async Task<int> StoreIssueAsync(string? name, string? detail, IssueTag? tag, string userId)
     {
         if (name == null || detail == null || tag == null)
-            return false;
+            return -1;
 
         try
         {
@@ -41,11 +41,31 @@ public class IssueData
             cmd.Parameters.AddWithValue("@discord", userId);
 
             await cmd.ExecuteNonQueryAsync();
-            return true;
+            
+            
+            // Get stored issue id
+            int id;
+            await using var idCmd = con.CreateCommand();
+            idCmd.CommandText = "SELECT id FROM zako WHERE name = @name AND discord=@discord AND tag=@tag ORDER BY id DESC LIMIT 1";
+            idCmd.Parameters.AddWithValue("@name", name);
+            idCmd.Parameters.AddWithValue("@discord", userId);
+            idCmd.Parameters.AddWithValue("@tag", tag.ToString());
+
+            await using var reader = await idCmd.ExecuteReaderAsync();
+            if (await reader.ReadAsync())
+            {
+                id = reader.GetInt32(0);
+            }
+            else
+            {
+                id = -1;
+            }
+
+            return id;
         }
         catch (Exception)
         {
-            return false;
+            return -1;
         }
     }
     
@@ -59,7 +79,7 @@ public class IssueData
             await using var con = new SqliteConnection("Data Source=" + DataBaseHelper.dbPath);
             await con.OpenAsync();
             await using var cmd = con.CreateCommand();
-            cmd.CommandText = "UPDATE zako SET status = @status WHERE ROWID = @id";
+            cmd.CommandText = "UPDATE zako SET status = @status WHERE id = @id";
             cmd.Parameters.AddWithValue("@status", newStatus.ToString());
             cmd.Parameters.AddWithValue("@id", issueId);
 
@@ -83,7 +103,7 @@ public class IssueData
             await using var con = new SqliteConnection("Data Source=" + DataBaseHelper.dbPath);
             await con.OpenAsync();
             await using var cmd = con.CreateCommand();
-            cmd.CommandText = "SELECT ROWID, name, detail, tag, status, discord FROM zako WHERE tag LIKE @tag AND status LIKE @status";
+            cmd.CommandText = "SELECT id, name, detail, tag, status, discord FROM zako WHERE tag LIKE @tag AND status LIKE @status";
             cmd.Parameters.AddWithValue("@tag", cTag);
             cmd.Parameters.AddWithValue("@status", cStatus);
 
@@ -118,7 +138,7 @@ public class IssueData
             await using var con = new SqliteConnection("Data Source=" + DataBaseHelper.dbPath);
             await con.OpenAsync();
             await using var cmd = con.CreateCommand();
-            cmd.CommandText = "SELECT name, detail, tag, status, discord  FROM zako WHERE ROWID = @id";
+            cmd.CommandText = "SELECT name, detail, tag, status, discord  FROM zako WHERE id = @id";
             cmd.Parameters.AddWithValue("@id", issueId);
             await using var reader = await cmd.ExecuteReaderAsync();
             if (!await reader.ReadAsync())
@@ -167,10 +187,32 @@ public class IssueData
             return false;
         }
     }
+
+    public static async Task<bool> UpdateIssueAsync(IssueJsonContent issueContent)
+    {
+        try
+        {
+            await using var con = new SqliteConnection("Data Source=" + DataBaseHelper.dbPath);
+            await con.OpenAsync();
+
+            await using var cmd = con.CreateCommand();
+            cmd.CommandText = "UPDATE zako SET name = @name, detail = @detail, tag = @tag WHERE id = @id";
+            cmd.Parameters.AddWithValue("@id", issueContent.Id);
+            cmd.Parameters.AddWithValue("@name", issueContent.Name);
+            cmd.Parameters.AddWithValue("@detail", issueContent.Detail);
+            cmd.Parameters.AddWithValue("@tag", issueContent.Tag.ToString());
+            return await cmd.ExecuteNonQueryAsync() > 0;
+        }
+        catch (Exception e)
+        {
+            Console.Error.WriteLine(e);
+            return false;
+        }
+    }
     
     #region ["Obsolete Sync Wrappers"]
     [Obsolete("Use StoreIssueAsync instead")]
-    public static bool StoreIssue(string? name, string? detail, IssueTag? tag, string userId)
+    public static int StoreIssue(string? name, string? detail, IssueTag? tag, string userId)
         => StoreIssueAsync(name, detail, tag, userId).GetAwaiter().GetResult();
     
     [Obsolete("Use UpdateIssueStatusAsync instead")]
