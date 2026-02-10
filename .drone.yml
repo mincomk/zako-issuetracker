@@ -6,8 +6,6 @@ steps:
 - name: build-docker-image
   image: plugins/docker
   settings:
-    context: zako-issuetracker
-    dockerfile: Dockerfile
     repo: registry.walruslab.org/common/zako-issuetracker
     tags: latest
     registry: registry.walruslab.org
