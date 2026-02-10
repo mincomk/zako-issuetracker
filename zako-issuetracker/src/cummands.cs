@@ -136,7 +136,7 @@ partial class Program
         var version = new SlashCommandBuilder()
             .WithName("version")
             .WithDescription("오늘자 가장 허접한 짓")
-            .WithContextTypes(new [] {InteractionContextType.PrivateChannel,InteractionContextType.Guild}).Build();
+            .WithContextTypes(new [] {InteractionContextType.PrivateChannel,InteractionContextType.BotDm,InteractionContextType.Guild}).Build();
         
         await _client.CreateGlobalApplicationCommandAsync(newIssue);
         await _client.CreateGlobalApplicationCommandAsync(ping);
