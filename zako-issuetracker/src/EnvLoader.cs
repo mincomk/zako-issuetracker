@@ -38,6 +38,8 @@ public static class EnvLoader
         
         return ids.Split(",");
     }
+    public static string? GetCommitHash()
+        => Environment.GetEnvironmentVariable("COMMIT_HASH") ?? null;
 
     public static int GetPageSize()
     {

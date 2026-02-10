@@ -5,6 +5,7 @@
       context: .
       dockerfile: zako-issuetracker/Dockerfile
     environment:
+      COMMITHASH: 
       DISCORD_TOKEN:
       SQLITE_FILE: /data/zako.sqlite
       ADMIN_IDS:

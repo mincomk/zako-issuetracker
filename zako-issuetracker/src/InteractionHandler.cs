@@ -594,6 +594,16 @@ partial class Program
                     }
                 }
                     break;
+                case "version":
+                {
+                    var eb = new EmbedBuilder()
+                        .WithTitle($"Hash={EnvLoader.GetCommitHash() ?? "Unknown"}")
+                        .WithDescription("repo = https://github.com/zako-ac/zako-issuetracker/git")
+                        .WithColor(Color.Purple)
+                        .WithCurrentTimestamp();
+                    await slashCommand.RespondAsync(embed: eb.Build(), ephemeral: false);
+                }
+                    break;
                 default:
                     await slashCommand.RespondAsync("Unknown command");
                     break;
