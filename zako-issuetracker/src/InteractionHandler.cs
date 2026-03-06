@@ -598,7 +598,7 @@ partial class Program
                 {
                     var eb = new EmbedBuilder()
                         .WithTitle($"Hash={EnvLoader.GetCommitHash() ?? "Unknown"}")
-                        .WithDescription("repo = https://github.com/zako-ac/zako-issuetracker/git")
+                        .WithDescription("repo = https://github.com/zako-ac/zako-issuetracker")
                         .WithColor(Color.Purple)
                         .WithCurrentTimestamp();
                     await slashCommand.RespondAsync(embed: eb.Build(), ephemeral: false);
