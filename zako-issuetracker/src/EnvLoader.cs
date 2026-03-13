@@ -39,7 +39,10 @@ public static class EnvLoader
         return ids.Split(",");
     }
     public static string? GetCommitHash()
-        => Environment.GetEnvironmentVariable("COMMIT_HASH") ?? null;
+        {
+            var hash =Environment.GetEnvironmentVariable("COMMIT_HASH");
+            return string.IsNullOrEmpty(hash) ? null : hash;
+        }
 
     public static int GetPageSize()
     {
