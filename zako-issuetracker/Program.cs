@@ -1,5 +1,6 @@
 ﻿using Discord;
 using Discord.WebSocket;
+using zako_issuetracker.GitHub;
 
 
 namespace zako_issuetracker;
@@ -46,6 +47,13 @@ partial class Program
         _client.InteractionCreated += InteractionCreatedAsync;
 
         Startup.StartupCheck();
+
+        if (EnvLoader.GetGitHubRepo() != null)
+            _ = Task.Run(async () =>
+            {
+                try { await GitHubPoller.StartAsync(); }
+                catch (Exception e) { Console.Error.WriteLine($"[GitHub] Fatal: {e.GetType().Name}"); }
+            });
 
         await _client.LoginAsync(TokenType.Bot, botToken); //or, read from console
 

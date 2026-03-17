@@ -60,6 +60,13 @@ partial class Program
                     .WithDescription("이슈 ID")
                     .WithRequired(true)
                     .WithType(ApplicationCommandOptionType.Integer))
+                .AddOption(new SlashCommandOptionBuilder()
+                    .WithName("source")
+                    .WithDescription("이슈 출처")
+                    .WithRequired(false)
+                    .WithType(ApplicationCommandOptionType.String)
+                    .AddChoice("local", "local")
+                    .AddChoice("github", "github"))
                 .WithType(ApplicationCommandOptionType.SubCommand))
             //new
             .AddOption(new SlashCommandOptionBuilder()

@@ -364,32 +364,69 @@ partial class Program
                         {
                             var issueId = (long)slashCommand.Data.Options.First().Options
                                 .First(o => o.Name == "id").Value;
+                            var sourceStr = slashCommand.Data.Options.First().Options
+                                .FirstOrDefault(o => o.Name == "source")?.Value?.ToString() ?? "local";
 
-                            var ctx = await IssueData.GetIssueByIdAsync((int)issueId);
-                            if (ctx == null)
+                            if (sourceStr == "github")
                             {
-                                var eb = new EmbedBuilder()
-                                    .WithTitle("오류가 발생했습니다")
-                                    .WithDescription("해당 이슈를 찾을 수 없습니다")
-                                    .WithColor(Color.Red)
-                                    .WithCurrentTimestamp();
-                                await slashCommand.RespondAsync(embed: eb.Build(), ephemeral: false);
+                                var ghIssue = await IssueData.GetGitHubIssueAsync((int)issueId);
+                                if (ghIssue == null)
+                                {
+                                    var eb = new EmbedBuilder()
+                                        .WithTitle("오류가 발생했습니다")
+                                        .WithDescription("해당 GitHub 이슈를 찾을 수 없습니다")
+                                        .WithColor(Color.Red)
+                                        .WithCurrentTimestamp();
+                                    await slashCommand.RespondAsync(embed: eb.Build(), ephemeral: false);
+                                }
+                                else
+                                {
+                                    string typeLabel = ghIssue.Value.IsPullRequest ? "Pull Request" : "Issue";
+                                    var eb = new EmbedBuilder()
+                                        .WithTitle($"이슈 [GitHub]")
+                                        .WithDescription("GitHub 이슈 정보를 불러왔습니다")
+                                        .AddField("Name", ghIssue.Value.Name)
+                                        .AddField("Issue ID", $"[GH] #{ghIssue.Value.GitHubNumber}", true)
+                                        .AddField("Type", typeLabel, true)
+                                        .AddField("Detail", ghIssue.Value.Detail, true)
+                                        .AddField("Tag", ghIssue.Value.Tag.ToString(), true)
+                                        .AddField("Status", ghIssue.Value.Status.ToString(), true)
+                                        .AddField("Author", $"@{ghIssue.Value.UserId}", true)
+                                        .AddField("Link", ghIssue.Value.HtmlUrl)
+                                        .WithColor(commands.IssueListEmbed.GitHubColor)
+                                        .WithCurrentTimestamp();
+
+                                    await slashCommand.RespondAsync(embed: eb.Build(), ephemeral: false);
+                                }
                             }
                             else
                             {
-                                var eb = new EmbedBuilder()
-                                    .WithTitle("이슈")
-                                    .WithDescription("이슈 정보를 불러왔습니다")
-                                    .AddField("Name", ctx.Value.Name)
-                                    .AddField("Issue ID", issueId.ToString(), true)
-                                    .AddField("Detail", ctx.Value.Detail, true)
-                                    .AddField("Tag", ctx.Value.Tag.ToString(), true)
-                                    .AddField("Status", ctx.Value.Status.ToString(), true)
-                                    .AddField("User", $"<@{ctx.Value.UserId}>", true)
-                                    .WithColor(Color.Blue)
-                                    .WithCurrentTimestamp();
+                                var ctx = await IssueData.GetIssueByIdAsync((int)issueId);
+                                if (ctx == null)
+                                {
+                                    var eb = new EmbedBuilder()
+                                        .WithTitle("오류가 발생했습니다")
+                                        .WithDescription("해당 이슈를 찾을 수 없습니다")
+                                        .WithColor(Color.Red)
+                                        .WithCurrentTimestamp();
+                                    await slashCommand.RespondAsync(embed: eb.Build(), ephemeral: false);
+                                }
+                                else
+                                {
+                                    var eb = new EmbedBuilder()
+                                        .WithTitle("이슈")
+                                        .WithDescription("이슈 정보를 불러왔습니다")
+                                        .AddField("Name", ctx.Value.Name)
+                                        .AddField("Issue ID", issueId.ToString(), true)
+                                        .AddField("Detail", ctx.Value.Detail, true)
+                                        .AddField("Tag", ctx.Value.Tag.ToString(), true)
+                                        .AddField("Status", ctx.Value.Status.ToString(), true)
+                                        .AddField("User", $"<@{ctx.Value.UserId}>", true)
+                                        .WithColor(Color.Blue)
+                                        .WithCurrentTimestamp();
 
-                                await slashCommand.RespondAsync(embed: eb.Build(), ephemeral: false);
+                                    await slashCommand.RespondAsync(embed: eb.Build(), ephemeral: false);
+                                }
                             }
                         }
                             break;

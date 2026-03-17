@@ -39,6 +39,18 @@ public static class Startup
         cmd.ExecuteNonQuery();
         cmd.CommandText = "CREATE TABLE IF NOT EXISTS zakonim(id TEXT PRIMARY KEY NOT NULL, description TEXT NOT NULL)";
         cmd.ExecuteNonQuery();
+        cmd.CommandText = @"CREATE TABLE IF NOT EXISTS github_issues(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            github_number INTEGER NOT NULL,
+            is_pr INTEGER NOT NULL DEFAULT 0,
+            tag TEXT NOT NULL,
+            status TEXT NOT NULL,
+            name TEXT NOT NULL,
+            detail TEXT NOT NULL,
+            author TEXT NOT NULL,
+            html_url TEXT NOT NULL,
+            UNIQUE(github_number, is_pr))";
+        cmd.ExecuteNonQuery();
         con.Close();
     }
 }
