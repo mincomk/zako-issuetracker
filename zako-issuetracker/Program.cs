@@ -48,11 +48,11 @@ partial class Program
 
         Startup.StartupCheck();
 
-        if (EnvLoader.GetGitHubRepo() != null)
+        if (!string.IsNullOrWhiteSpace(EnvLoader.GetGitHubRepo()))
             _ = Task.Run(async () =>
             {
                 try { await GitHubPoller.StartAsync(); }
-                catch (Exception e) { Console.Error.WriteLine($"[GitHub] Fatal: {e.GetType().Name}"); }
+                catch (Exception e) { Console.Error.WriteLine($"[GitHub] Fatal: {e}"); }
             });
 
         await _client.LoginAsync(TokenType.Bot, botToken); //or, read from console

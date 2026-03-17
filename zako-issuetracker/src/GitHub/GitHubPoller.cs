@@ -50,7 +50,7 @@ public static class GitHubPoller
             }
             catch (Exception e)
             {
-                Console.Error.WriteLine($"[GitHub] Poll error: {e.GetType().Name}");
+                Console.Error.WriteLine($"[GitHub] Poll error: {e}");
             }
 
             await Task.Delay(intervalMs);
@@ -164,8 +164,7 @@ public static class GitHubPoller
 
         if (issues.Count == 0)
         {
-            Console.WriteLine("[GitHub] No issues returned, skipping sync to preserve existing data");
-            return;
+            Console.WriteLine("[GitHub] No open issues returned, clearing github_issues table");
         }
 
         await IssueData.SyncGitHubIssuesAsync(issues);

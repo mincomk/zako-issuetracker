@@ -116,10 +116,12 @@ public class IssueData
             cmd.Parameters.AddWithValue("@status2", cStatus);
 
             await using var reader = await cmd.ExecuteReaderAsync();
-            int key = 0;
             while (await reader.ReadAsync())
             {
-                dict.Add(key++, new IssueContent
+                int id = reader.GetInt32(0);
+                bool isGitHub = reader.GetInt32(6) == 1;
+                int key = isGitHub ? -(id) : id;
+                dict.Add(key, new IssueContent
                 {
                     Name = reader.GetString(1),
                     Detail = reader.GetString(2),
@@ -249,8 +251,9 @@ public class IssueData
                 HtmlUrl = reader.GetString(7)
             };
         }
-        catch (Exception)
+        catch (Exception e)
         {
+            Console.Error.WriteLine($"GetGitHubIssueAsync failed: {e}");
             return null;
         }
     }
@@ -264,10 +267,12 @@ public class IssueData
             await using var transaction = await con.BeginTransactionAsync();
 
             await using var delCmd = con.CreateCommand();
+            delCmd.Transaction = (SqliteTransaction)transaction;
             delCmd.CommandText = "DELETE FROM github_issues";
             await delCmd.ExecuteNonQueryAsync();
 
             await using var cmd = con.CreateCommand();
+            cmd.Transaction = (SqliteTransaction)transaction;
             cmd.CommandText = @"INSERT INTO github_issues (github_number, is_pr, tag, status, name, detail, author, html_url)
                 VALUES (@num, @is_pr, @tag, @status, @name, @detail, @author, @url)";
             var pNum = cmd.Parameters.Add("@num", SqliteType.Integer);
