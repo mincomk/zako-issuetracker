@@ -49,7 +49,7 @@ public static class Startup
             detail TEXT NOT NULL,
             author TEXT NOT NULL,
             html_url TEXT NOT NULL,
-            UNIQUE(github_number, is_pr))";
+            UNIQUE(github_number))";
         cmd.ExecuteNonQuery();
         con.Close();
     }

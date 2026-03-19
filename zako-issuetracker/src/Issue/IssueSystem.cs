@@ -301,7 +301,7 @@ public class IssueData
         }
         catch (Exception e)
         {
-            Console.Error.WriteLine($"GitHub sync failed: {e.Message}");
+            Console.Error.WriteLine($"GitHub sync failed: {e}");
         }
     }
 
