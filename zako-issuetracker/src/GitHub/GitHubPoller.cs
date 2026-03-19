@@ -11,6 +11,7 @@ public static class GitHubPoller
     private static readonly HttpClient _http = CreateHttpClient();
     private static readonly Regex _repoPattern = new(@"^[a-zA-Z0-9\-_.]+/[a-zA-Z0-9\-_.]+$");
     private static string? _etag;
+    private const int MaxBodyLength = 200;
 
     private static HttpClient CreateHttpClient()
     {
@@ -62,7 +63,7 @@ public static class GitHubPoller
         var issues = new List<IssueContent>();
         int page = 1;
 
-        while (page <= 2)
+        while (true)
         {
             string url = $"https://api.github.com/repos/{repo}/issues?state=open&per_page=100&sort=updated&direction=desc&page={page}";
 
@@ -129,8 +130,8 @@ public static class GitHubPoller
                 string body = item.TryGetProperty("body", out var bodyEl) && bodyEl.ValueKind == JsonValueKind.String
                     ? bodyEl.GetString() ?? ""
                     : "";
-                if (body.Length > 200)
-                    body = body[..200] + "...";
+                if (body.Length > MaxBodyLength)
+                    body = body[..MaxBodyLength] + "...";
 
                 string author = "unknown";
                 if (item.TryGetProperty("user", out var userObj)
