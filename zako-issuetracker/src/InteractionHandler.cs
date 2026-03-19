@@ -333,8 +333,9 @@ partial class Program
                                 tag = Enum.Parse<IssueTag>(tagStr, true);
                             var dict = await Issue.IssueData.ListOfIssueAsync(tag);
 
-                            var jsonList = new List<Issue.IssueJsonContent>(dict.Count);
-                            foreach (var ctx in dict)
+                            var localOnly = dict.Where(kv => !kv.Value.IsGitHub);
+                            var jsonList = new List<Issue.IssueJsonContent>();
+                            foreach (var ctx in localOnly)
                             {
                                 jsonList.Add(new IssueJsonContent()
                                 {

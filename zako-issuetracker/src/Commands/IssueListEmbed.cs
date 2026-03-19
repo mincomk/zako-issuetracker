@@ -13,8 +13,10 @@ public static class IssueListEmbed
         string sTag = tag?.ToString() ?? "All";
         string sStatus = status?.ToString() ?? "All";
 
-        var appearedIssues = dict.OrderBy(kv => kv.Key).Skip((page -1) * PageSize).Take(PageSize);
-
+        var appearedIssues = dict
+            .OrderBy(kv => kv.Value.IsGitHub)
+            .ThenBy(kv => kv.Value.IsGitHub ? kv.Value.GitHubNumber : kv.Key)
+            .Skip((page - 1) * PageSize).Take(PageSize);
         var embeds = new List<Embed>();
 
         foreach (var ctx in appearedIssues)

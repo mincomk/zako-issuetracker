@@ -108,12 +108,9 @@ public class IssueData
             await con.OpenAsync();
             await using var cmd = con.CreateCommand();
             cmd.CommandText = "SELECT id, name, detail, tag, status, discord, 0 as is_github, 0 as github_number, 0 as is_pr, '' as html_url FROM zako WHERE tag LIKE @tag AND status LIKE @status"
-                + " UNION ALL SELECT id, name, detail, tag, status, author, 1 as is_github, github_number, is_pr, html_url FROM github_issues WHERE tag LIKE @tag2 AND status LIKE @status2"
-                + " ORDER BY is_github ASC, id ASC";
+                + " UNION ALL SELECT id, name, detail, tag, status, author, 1 as is_github, github_number, is_pr, html_url FROM github_issues WHERE tag LIKE @tag AND status LIKE @status"                + " ORDER BY is_github ASC, id ASC";
             cmd.Parameters.AddWithValue("@tag", cTag);
             cmd.Parameters.AddWithValue("@status", cStatus);
-            cmd.Parameters.AddWithValue("@tag2", cTag);
-            cmd.Parameters.AddWithValue("@status2", cStatus);
 
             await using var reader = await cmd.ExecuteReaderAsync();
             while (await reader.ReadAsync())
