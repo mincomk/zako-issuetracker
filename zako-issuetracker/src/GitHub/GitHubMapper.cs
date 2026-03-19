@@ -25,12 +25,8 @@ public static class GitHubMapper
         return IssueTag.Enhancement;
     }
 
-    public static IssueStatus MapState(string state, bool isPr, bool? merged)
+    public static IssueStatus MapState(string state)
     {
-        if (state == "open")
-            return IssueStatus.Proposed;
-        if (isPr && merged != true)
-            return IssueStatus.Rejected;
-        return IssueStatus.Completed;
+        return IssueStatus.Proposed;
     }
 }

@@ -112,9 +112,6 @@ public static class GitHubPoller
             foreach (var item in items)
             {
                 bool isPr = item.TryGetProperty("pull_request", out var prObj);
-                bool? merged = null;
-                if (isPr && prObj.TryGetProperty("merged_at", out var mergedAt))
-                    merged = mergedAt.ValueKind != JsonValueKind.Null;
 
                 string state = item.GetProperty("state").GetString() ?? "open";
 
@@ -148,7 +145,7 @@ public static class GitHubPoller
                     Name = title,
                     Detail = body,
                     Tag = GitHubMapper.MapLabelsToTag(labels),
-                    Status = GitHubMapper.MapState(state, isPr, merged),
+                    Status = GitHubMapper.MapState(state),
                     UserId = author,
                     IsGitHub = true,
                     GitHubNumber = number,
