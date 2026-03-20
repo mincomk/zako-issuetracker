@@ -46,6 +46,16 @@ public static class EnvLoader
             return 5;
         return int.Parse(v);
     }
+
+    public static string? GetGitHubRepo()
+    {
+        return Environment.GetEnvironmentVariable("GITHUB_REPO");
+    }
+
+    public static string? GetGitHubToken()
+    {
+        return Environment.GetEnvironmentVariable("GITHUB_TOKEN");
+    }
 }
 
 public static class AdminTool
