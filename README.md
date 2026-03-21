@@ -53,6 +53,9 @@ tag = IssueTag, Status = Issue Status, name = Issue Name, Detial = Issue Detail,
 
 ![`/이슈 내보내기`](img/export.png)
 
+![`/자코님`](img/zakonim.png)
+- `/자코님 <사용자:any> <설명>` <br> 선택한 사용자를 자코님에 등록
+
 ## 구현
 최대한 간단하게, PostgresSQL이나 Mongo 쓰면 좋을듯?
 언어는 뭐 파이썬을 쓰던 go를쓰던 TS하던 알아서 끌리는거<br><br>
