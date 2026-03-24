@@ -38,6 +38,11 @@ public static class EnvLoader
         
         return ids.Split(",");
     }
+    public static string? GetCommitHash()
+        {
+            var hash =Environment.GetEnvironmentVariable("COMMIT_HASH");
+            return string.IsNullOrEmpty(hash) ? null : hash;
+        }
 
     public static int GetPageSize()
     {
@@ -45,6 +50,16 @@ public static class EnvLoader
         if (v == null)
             return 5;
         return int.Parse(v);
+    }
+
+    public static string? GetGitHubRepo()
+    {
+        return Environment.GetEnvironmentVariable("GITHUB_REPO");
+    }
+
+    public static string? GetGitHubToken()
+    {
+        return Environment.GetEnvironmentVariable("GITHUB_TOKEN");
     }
 }
 

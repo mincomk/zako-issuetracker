@@ -60,6 +60,13 @@ partial class Program
                     .WithDescription("이슈 ID")
                     .WithRequired(true)
                     .WithType(ApplicationCommandOptionType.Integer))
+                .AddOption(new SlashCommandOptionBuilder()
+                    .WithName("source")
+                    .WithDescription("이슈 출처")
+                    .WithRequired(false)
+                    .WithType(ApplicationCommandOptionType.String)
+                    .AddChoice("local", "local")
+                    .AddChoice("github", "github"))
                 .WithType(ApplicationCommandOptionType.SubCommand))
             //new
             .AddOption(new SlashCommandOptionBuilder()
@@ -133,9 +140,15 @@ partial class Program
                 .WithType(ApplicationCommandOptionType.String))
             .WithContextTypes(new[] {InteractionContextType.PrivateChannel,InteractionContextType.BotDm,InteractionContextType.Guild}).Build();
         
+        var version = new SlashCommandBuilder()
+            .WithName("version")
+            .WithDescription("오늘자 가장 허접한 짓")
+            .WithContextTypes(new [] {InteractionContextType.PrivateChannel,InteractionContextType.BotDm,InteractionContextType.Guild}).Build();
+        
         await _client.CreateGlobalApplicationCommandAsync(newIssue);
         await _client.CreateGlobalApplicationCommandAsync(ping);
         await _client.CreateGlobalApplicationCommandAsync(zakonim);
+        await _client.CreateGlobalApplicationCommandAsync(version);
         
         #endregion
     }

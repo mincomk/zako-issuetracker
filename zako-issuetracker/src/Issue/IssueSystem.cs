@@ -9,6 +9,10 @@ public struct IssueContent
     public IssueTag Tag;
     public IssueStatus Status;
     public string UserId;
+    public bool IsGitHub;
+    public int GitHubNumber;
+    public bool IsPullRequest;
+    public string HtmlUrl;
 }
 
 public class IssueJsonContent
@@ -103,20 +107,28 @@ public class IssueData
             await using var con = new SqliteConnection("Data Source=" + DataBaseHelper.dbPath);
             await con.OpenAsync();
             await using var cmd = con.CreateCommand();
-            cmd.CommandText = "SELECT id, name, detail, tag, status, discord FROM zako WHERE tag LIKE @tag AND status LIKE @status";
+            cmd.CommandText = "SELECT id, name, detail, tag, status, discord, 0 as is_github, 0 as github_number, 0 as is_pr, '' as html_url FROM zako WHERE tag LIKE @tag AND status LIKE @status"
+                + " UNION ALL SELECT id, name, detail, tag, status, author, 1 as is_github, github_number, is_pr, html_url FROM github_issues WHERE tag LIKE @tag AND status LIKE @status"                + " ORDER BY is_github ASC, id ASC";
             cmd.Parameters.AddWithValue("@tag", cTag);
             cmd.Parameters.AddWithValue("@status", cStatus);
 
             await using var reader = await cmd.ExecuteReaderAsync();
             while (await reader.ReadAsync())
             {
-                dict.Add(reader.GetInt32(0), new IssueContent
+                int id = reader.GetInt32(0);
+                bool isGitHub = reader.GetInt32(6) == 1;
+                int key = isGitHub ? -(id) : id;
+                dict.Add(key, new IssueContent
                 {
                     Name = reader.GetString(1),
                     Detail = reader.GetString(2),
                     Tag = Enum.Parse<IssueTag>(reader.GetString(3)),
                     Status = Enum.Parse<IssueStatus>(reader.GetString(4)),
-                    UserId = reader.GetString(5)
+                    UserId = reader.GetString(5),
+                    IsGitHub = reader.GetInt32(6) == 1,
+                    GitHubNumber = reader.GetInt32(7),
+                    IsPullRequest = reader.GetInt32(8) == 1,
+                    HtmlUrl = reader.GetString(9)
                 });
             }
         }
@@ -210,6 +222,86 @@ public class IssueData
         }
     }
     
+    public static async Task<IssueContent?> GetGitHubIssueAsync(int githubNumber)
+    {
+        try
+        {
+            await using var con = new SqliteConnection("Data Source=" + DataBaseHelper.dbPath);
+            await con.OpenAsync();
+            await using var cmd = con.CreateCommand();
+            cmd.CommandText = "SELECT name, detail, tag, status, author, github_number, is_pr, html_url FROM github_issues WHERE github_number = @num";
+            cmd.Parameters.AddWithValue("@num", githubNumber);
+            await using var reader = await cmd.ExecuteReaderAsync();
+            if (!await reader.ReadAsync())
+                return null;
+
+            return new IssueContent
+            {
+                Name = reader.GetString(0),
+                Detail = reader.GetString(1),
+                Tag = Enum.Parse<IssueTag>(reader.GetString(2)),
+                Status = Enum.Parse<IssueStatus>(reader.GetString(3)),
+                UserId = reader.GetString(4),
+                IsGitHub = true,
+                GitHubNumber = reader.GetInt32(5),
+                IsPullRequest = reader.GetInt32(6) == 1,
+                HtmlUrl = reader.GetString(7)
+            };
+        }
+        catch (Exception e)
+        {
+            Console.Error.WriteLine($"GetGitHubIssueAsync failed: {e}");
+            return null;
+        }
+    }
+
+    public static async Task SyncGitHubIssuesAsync(List<IssueContent> issues)
+    {
+        try
+        {
+            await using var con = new SqliteConnection("Data Source=" + DataBaseHelper.dbPath);
+            await con.OpenAsync();
+            await using var transaction = await con.BeginTransactionAsync();
+
+            await using var delCmd = con.CreateCommand();
+            delCmd.Transaction = (SqliteTransaction)transaction;
+            delCmd.CommandText = "DELETE FROM github_issues";
+            await delCmd.ExecuteNonQueryAsync();
+
+            await using var cmd = con.CreateCommand();
+            cmd.Transaction = (SqliteTransaction)transaction;
+            cmd.CommandText = @"INSERT INTO github_issues (github_number, is_pr, tag, status, name, detail, author, html_url)
+                VALUES (@num, @is_pr, @tag, @status, @name, @detail, @author, @url)";
+            var pNum = cmd.Parameters.Add("@num", SqliteType.Integer);
+            var pIsPr = cmd.Parameters.Add("@is_pr", SqliteType.Integer);
+            var pTag = cmd.Parameters.Add("@tag", SqliteType.Text);
+            var pStatus = cmd.Parameters.Add("@status", SqliteType.Text);
+            var pName = cmd.Parameters.Add("@name", SqliteType.Text);
+            var pDetail = cmd.Parameters.Add("@detail", SqliteType.Text);
+            var pAuthor = cmd.Parameters.Add("@author", SqliteType.Text);
+            var pUrl = cmd.Parameters.Add("@url", SqliteType.Text);
+
+            foreach (var issue in issues)
+            {
+                pNum.Value = issue.GitHubNumber;
+                pIsPr.Value = issue.IsPullRequest ? 1 : 0;
+                pTag.Value = issue.Tag.ToString();
+                pStatus.Value = issue.Status.ToString();
+                pName.Value = issue.Name;
+                pDetail.Value = issue.Detail;
+                pAuthor.Value = issue.UserId;
+                pUrl.Value = issue.HtmlUrl;
+                await cmd.ExecuteNonQueryAsync();
+            }
+
+            await transaction.CommitAsync();
+        }
+        catch (Exception e)
+        {
+            Console.Error.WriteLine($"GitHub sync failed: {e}");
+        }
+    }
+
     #region ["Obsolete Sync Wrappers"]
     [Obsolete("Use StoreIssueAsync instead")]
     public static int StoreIssue(string? name, string? detail, IssueTag? tag, string userId)
